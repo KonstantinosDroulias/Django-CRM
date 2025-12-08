@@ -1,0 +1,18 @@
+{% load static %}
+
+<div class="flex items-center">
+    <div class="border-r border-b border-gray-200  max-w-[240px] p-5">
+        <img src="{% static 'img/logo.png' %}" alt="Clerio Logo">
+    </div>
+    <div class="flex justify-between items-center px-14 w-full">
+        <div>
+            <form class="border border-gray-400 rounded-full flex items-center px-3 py-1 w-[320px]" action="#" method="GET">
+                <input class="outline-0 p-1 flex-1" type="text" placeholder="Search Here..." name="search">
+                <button type="submit"><img src="{% static 'img/search-magnifier.png' %}" alt="Search Icon"></button>
+            </form>
+        </div>
+        <div>
+            <a href="#" class="text-brand-400 underline hover:text-brand-600">Need Help?</a>
+        </div>
+    </div>
+</div>

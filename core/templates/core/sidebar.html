@@ -1,0 +1,23 @@
+{% load static %}
+<div class="flex flex-col justify-between bg-bg px-3 py-5 w-full max-w-[240px]">
+
+    <nav class="flex flex-col justify-between h-screen">
+        <div>
+            {% include "components/nav-link.html" with url="/" img_url="/static/img/dashboard.svg" alt_text="Dashboard icon" text="Dashboard" %}
+            {% include "components/nav-link.html" with url="/" img_url="/static/img/List.svg" alt_text="Lead List icon" text="Lead List" %}
+            {% include "components/nav-link.html" with url="/" img_url="/static/img/Project.svg" alt_text="Dashboard icon" text="Projects" %}
+        </div>
+
+        <div class="flex flex-col gap-5">
+            <button class="hover:cursor-pointer">
+                <img src="/static/img/colapse.svg" alt="Collapse icon">
+            </button>
+            {% include "components/profile-dropdown.html" with url="/profile/" img_url="/static/img/employee.svg" alt_text="User profile image" username="Elias Markson" user_role="Employee"%}
+        </div>
+    </nav>
+
+
+    <footer class="border-top border-gray-light mt-4 pt-4 text-center text-muted">
+        {% include 'core/footer.html' %}
+    </footer>
+</div>
