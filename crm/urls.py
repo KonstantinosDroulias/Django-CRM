@@ -16,9 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from users.views import ClerioLoginView
+from django.conf.urls import handler403, handler404
 
+handler403 = 'core.views.error_403'
+handler404 = 'core.views.error_404'
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('django.contrib.auth.urls')),
+    path('login/', ClerioLoginView.as_view(), name='login'),
     path('', include('core.urls')),
     path('', include('users.urls')),
+    path('', include('dashboard.urls')),
+    path('', include('todo.urls')),
+
 ]

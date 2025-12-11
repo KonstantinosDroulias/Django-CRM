@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+    <section class="grid 2xl:grid-cols-6 xl:grid-cols-4 md:grid-cols-2 sm:grid-cols-2 gap-4">
+        {% include 'components/stats-card.html' with img_url="/static/img/NewLead.svg" card_title="New Leads" amount="313" percentage="2.41" caption="caption" %}
+        {% include 'components/stats-card.html' with img_url="/static/img/NewLead.svg" card_title="New Leads" amount="313" percentage="2.41" caption="caption" %}
+        {% include 'components/stats-card.html' with img_url="/static/img/NewLead.svg" card_title="New Leads" amount="313" percentage="2.41" caption="caption" %}
+    </section>
+
+    <section class="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
+        {% include 'components/scheduled-tasks.html' with title="Scheduled Tasks" task_title="Team Meeting" task_date="Nov 3, 2025" task_time="10:00AM" %}
+        {% include 'components/todo.html' %}
+    </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/todo.js' %}"></script>
+{% endblock %}

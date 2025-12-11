@@ -1,0 +1,19 @@
+<div class="p-5 bg-bg rounded-lg shadow space-y-2">
+    <h2 class="text-4xl font-bold text-text py-3">Todos</h2>
+    <hr>
+    <div class="space-y-3">
+        <ul class="py-1 space-y-3 h-[120px] overflow-y-scroll" id="todoList">
+        {% for todo in todos %}
+            <li class="flex justify-between items-center pr-2">
+                <span class="text-text text-lg">{{ todo.text }}</span>
+                <button onclick="removeTodoItem(this)" class="border-1 rounded-full w-3.5 h-3.5 hover:bg-brand-50 active:bg-brand-400" data-id="{{ todo.id }}" ></button>
+            </li>
+        {% endfor %}
+        </ul>
+        <form class="flex items-center py-1" id="todoForm">
+            <input id="todoInput" type="text" class="focus:outline-0 flex-1 placeholder:text-gray-400 text-text border-0" placeholder="Add New Todo...">
+            {% load static %}
+            <button id="todoBtn" title="Press Enter" type="submit" class="rounded-full p-2 bg-brand-400 hover:cursor-pointer"><img width="15px" height="15px" src="{% static 'img/Plus.svg' %}" alt="Plus Icon"></button>
+        </form>
+    </div>
+</div>

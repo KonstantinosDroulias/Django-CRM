@@ -1,4 +1,5 @@
 {% load static %}
+{% load crispy_forms_tags %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -12,24 +13,12 @@
 <body class="h-screen flex items-center justify-center bg-brand-200">
     <form class="flex flex-col p-5 rounded-lg bg-bg shadow gap-6" method="POST" action="{% url 'login' %}">
          {% csrf_token %}
-        <div class="max-w-[260px]"><img src="/static/img/logo.png" alt="Clerio Logo"></div>
-        <div class="flex flex-col gap-4">
-            <input type="text" class="px-4 py-3 border-1 border-text rounded-lg w-full text-text placeholder:text-gray-400" placeholder="Username" name="username">
-            <input type="password" class="px-4 py-3 border-1 border-text rounded-lg w-full text-text placeholder:text-gray-400" placeholder="Password" name="password">
-        </div>
+        <div class="max-w-[260px] mx-auto"><img src="/static/img/logo.png" alt="Clerio Logo"></div>
+        {{ form|crispy }}
         <div class="flex flex-col gap-3">
             <button type="submit" class="bg-brand-400 text-text px-5 p-3 hover:cursor-pointer hover:bg-brand-200">Login</button>
             <p>Only authorized Clerio users must login.</p>
         </div>
     </form>
-{% if messages %}
-    <div class="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-[300px] p-4 rounded-lg shadow bg-error text-white text-center z-50">
-        <ul class="list-none">
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-{% endif %}
 </body>
 </html>

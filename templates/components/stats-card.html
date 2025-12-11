@@ -1,0 +1,20 @@
+{% load static %}
+
+<div class="p-5 rounded-lg bg-bg text-text shadow flex gap-4">
+    <div class="overflow-hidden rounded-full bg-brand-400 p-3 shrink-0">
+        <img src="{{ img_url }}" width="60px" height="60px" alt="New Lead Icon">
+    </div>
+    <div class="flex flex-col gap-3">
+        <div class="text-xl">{{ card_title }}</div>
+        <div class="flex gap-2">
+            <div class="text-3xl font-bold">{{ amount }}</div>
+            <div class="flex flex-col">
+                <div class="flex gap-1">
+                    <img src="{% static 'img/tiltedarrow.svg' %}" alt="arrow icon" width="20px" height="20px" style="transform: rotate(-45deg);">
+                    <p class="text-green-400">{{ percentage }}%</p>
+                </div>
+                <div class="text-sm text-gray-400">{{ caption }}</div>
+            </div>
+        </div>
+    </div>
+</div>
