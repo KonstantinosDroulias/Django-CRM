@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Customers{% endblock %}
+
+{% block body %}
+
+<div class="flex justify-between items-center">
+    <div>
+        <form class="gap-5 flex items-center" method="GET">
+            <div class="flex gap-2 w-min">
+                <label for="created-date" class="text-right text-wrap">Created Date</label>
+                <input class="p-2 bg-bg border-1 rounded-sm" type="date" id="created-date" name="created-date" value="{{ request.GET.created_date }}">
+            </div>
+            <div class="flex gap-2 items-center">
+                <label for="source">Source</label>
+                <select class="pl-1 py-2 pr-3 bg-bg border-1 rounded-sm" name="source" id="source">
+                    {% for source in sources %}
+                        <option value="{{ source.name }}">{{ source.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="hover:cursor-pointer p-1 bg-brand-400 shadow text-sm flex items-center gap-1">Apply <img width="12px" height="12px" src="/static/img/Filter.svg" alt="Filter Icon"></button>
+        </form>
+    </div>
+    <div>
+        <button class="px-3 py-2 bg-brand-400 hover:cursor-pointer flex items-center gap-2" id="addLead">New Lead <img src="/static/img/NewLead.svg" alt="Add Lead Icon" height="20px" width="20px"></button>
+    </div>
+</div>
+
+<div class="p-5 rounded-lg bg-bg shadow space-y-4 overflow-x-scroll">
+    <h2 class="text-text font-bold text-3xl">Lead List</h2>
+    <hr>
+    <table class="w-full text-text text-lg border-separate border-spacing-y-2">
+        <thead class="text-left bg-brand-100 sticky top-0">
+            <tr>
+                <th class="p-3 font-normal text-nowrap">Name</th>
+                <th class="p-3 font-normal text-nowrap">Company Name</th>
+                <th class="p-3 font-normal text-nowrap">Email</th>
+                <th class="p-3 font-normal text-nowrap">Phone</th>
+                <th class="p-3 font-normal text-nowrap">Source</th>
+                <th class="p-3 font-normal text-nowrap">Lead Status</th>
+                <th class="p-3 font-normal text-nowrap">Assigned To</th>
+                <th class="p-3 font-normal text-nowrap">Last Contacted</th>
+                <th class="p-3 font-normal text-nowrap">Next Follow-up Date</th>
+                <th class="p-3 font-normal text-nowrap">Value</th>
+                <th class="p-3 font-normal text-nowrap">Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customers %}
+                <tr class="group">
+                    <td class="p-3 text-nowrap"><p class="relative">
+                        {{ customer.first_name }} {{ customer.last_name }}
+                        <a class="hidden group-hover:block absolute top-0 left-[-30px] z-50 p-1 border-1 bg-bg shadow-sm" href="/customer/{{ customer.id }}"><img width="20px" height="20px" src="/static/img/PersonIcon.svg" alt="Edit Icon"></a>
+                    </p></td>
+                    <td class="p-3 text-nowrap">{{ customer.company_name }}</td>
+                    <td class="p-3 text-nowrap">{{ customer.email }}</td>
+                    <td class="p-3 text-nowrap">{{ customer.phone_number }}</td>
+                    <td class="p-3 text-nowrap">
+                        <select class="pl-1 py-1 pr-2 text-sm bg-bg border-1 rounded-sm">
+                            {% for source in sources %}
+                                <option value="{{ source.id }}"
+                                    {% if customer.source.id == source.id %}selected{% endif %}>
+                                    {{ source.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td class="p-3 text-nowrap">
+                        <select class="pl-1 py-1 pr-2 text-sm bg-bg border-1 rounded-sm">
+                            {% for status in lead_status %}
+                                <option value="{{ status.id }}"
+                                    {% if customer.lead_status.id == status.id %}selected{% endif %}>
+                                    {{ status.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td class="p-3 text-nowrap">
+                        <div class="h-[40px] overflow-y-scroll space-y-1">
+                            {% for user in customer.assigned_to.all %}
+                                <div class="flex items-center gap-2">
+                                    <div class="shrink-0 rounded-full overflow-hidden w-[28px] h-[28px]">
+                                        <img src="{{ user.profile.avatar.url }}" alt="User Avatar">
+                                    </div>
+                                    <p class="text-text text-base">{{ user.username }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td class="p-3 text-nowrap">{{ customer.last_contact }}</td>
+                    <td class="p-3 text-nowrap">{{ customer.next_contact }}</td>
+                    <td class="p-3 text-nowrap">{{ customer.value }}€</td>
+                    <td class="p-3 text-nowrap">{{ customer.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/customers.js' %}"></script>
+{% endblock %}

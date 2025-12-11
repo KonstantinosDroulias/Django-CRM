@@ -32,6 +32,7 @@ urlpatterns = [
     path('', include('users.urls')),
     path('', include('dashboard.urls')),
     path('', include('todo.urls')),
+    path('', include('customers.urls')),
 
 ]
 
