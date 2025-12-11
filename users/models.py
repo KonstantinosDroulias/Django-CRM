@@ -9,4 +9,4 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"{self.user.username}, {self.phone_number}, {self.role}"
+        return f"{self.user.username}, {self.phone_number}, {self.avatar}"
