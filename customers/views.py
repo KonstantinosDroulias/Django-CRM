@@ -17,9 +17,9 @@ def index(request):
     return  render(request, 'customers/index.html', context)
 
 def customer(request, pk):
-    lead_status = LeadStatus.objects.filter(customer_id=pk)
-    sources = Source.objects.filter(customer_id=pk)
-    customer = Customer.objects.get(customer_id=pk)
+    lead_status = LeadStatus.objects.filter(id=pk)
+    sources = Source.objects.filter(id=pk)
+    customer = Customer.objects.get(id=pk)
     context = {
         'lead_status': lead_status,
         'sources': sources,

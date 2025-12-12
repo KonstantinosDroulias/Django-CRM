@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'dist/output.css' %}">
     <title>Clerio -The CRM your team needs</title>
 </head>
-<body class="h-screen flex items-center justify-center bg-brand-200">
+<body class="h-screen flex items-center justify-center bg-brand-50">
     <form class="flex flex-col p-5 rounded-lg bg-bg shadow gap-6" method="POST" action="{% url 'login' %}">
          {% csrf_token %}
         <div class="max-w-[260px] mx-auto"><img src="/static/img/logo.png" alt="Clerio Logo"></div>

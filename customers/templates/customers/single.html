@@ -5,7 +5,142 @@
 
 {% block body %}
 
+<section class="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-5">
+    <div class="bg-bg p-5 rounded-lg shadow">
+            <form class="space-y-4" action="" method="post">
+            {% csrf_token %}
 
+            <h1 class="text-text text-4xl font-bold mb-4">
+                <input class="w-min" type="text" placeholder="First Name" name="first_name" value="{{ customer.first_name }}">
+                <input class="w-min" type="text" placeholder="Last Name" name="last_name" value="{{ customer.last_name }}">
+            </h1>
+
+            <section class="grid grid-cols-2 items-center gap-6 mb-4 p-2">
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">Address:</label>
+                    <input type="text" placeholder="Address" name="address"
+                           value="{{ customer.address }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">City:</label>
+                    <input type="text" placeholder="City" name="city"
+                           value="{{ customer.city }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">State:</label>
+                    <input type="text" placeholder="State" name="state"
+                           value="{{ customer.state }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">Country:</label>
+                    <input type="text" placeholder="Country" name="country"
+                           value="{{ customer.country }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+            </section>
+
+
+            <section class="grid grid-cols-2 items-center gap-6 mb-4 p-2">
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">Company Name:</label>
+                    <input type="text" placeholder="Company Name" name="company_name"
+                           value="{{ customer.company_name }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">VAT ID:</label>
+                    <input type="text" placeholder="VAT ID" name="vat_id"
+                           value="{{ customer.vat_id }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">Email:</label>
+                    <input type="text" placeholder="Email" name="email"
+                           value="{{ customer.email }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">Phone:</label>
+                    <input type="text" placeholder="Phone" name="phone"
+                           value="{{ customer.phone_number }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+            </section>
+
+
+            <section class="flex items-center gap-6 mb-4 p-2">
+            <div class="flex gap-3 items-center">
+            <label for="source">Source</label>
+            <select class="pl-1 py-2 pr-3 bg-bg border-1 rounded-sm" name="source" id="source">
+                {% for source in sources %}
+                    <option value="{{ source.id }}"
+                        {% if customer.source.id == source.id %}selected{% endif %}>
+                        {{ source.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            </div>
+            <div class="flex gap-3 items-center">
+            <label for="lead_status">Lead Status</label>
+            <select class="pl-1 py-2 pr-3 bg-bg border-1 rounded-sm" name="lead_status" id="lead_status">
+                {% for status in lead_status %}
+                    <option value="{{ status.id }}"
+                        {% if customer.lead_status.id == status.id %}selected{% endif %}>
+                        {{ status.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            </div>
+            </section>
+
+            <!--
+            <section>
+            Projects Completed. Total Revenue from Client. Unpaid invoices
+            </section>
+            -->
+
+            <section style="background: #f7f7f7" class="p-3">
+                <h2 class="text-text text-2xl">Projects</h2>
+                <div class="flex items-center gap-1">
+                    <hr class="w-full">
+                    <button title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
+                </div>
+            </section>
+
+            <section class="mb-4 p-2">
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-text">Comments:</label>
+                    <textarea name="comments" id="comments" rows="6" class="border border-gray-300 rounded px-2 py-1"></textarea>
+                </div>
+            </section>
+
+        </form>
+    </div>
+    <div class="bg-bg p-5 rounded-lg shadow space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl">Assigned Users</h2>
+            <button title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
+        </div>
+        <hr>
+        {% for user in customer.assigned_to.all %}
+            <div class="flex items-center gap-2">
+                <div class="shrink-0 rounded-full overflow-hidden w-[32px] h-[32px]">
+                    <img src="{{ user.profile.avatar.url }}" alt="User Avatar">
+                </div>
+                <p class="text-text text-lg">{{ user.username }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
 
 {% endblock %}
 
