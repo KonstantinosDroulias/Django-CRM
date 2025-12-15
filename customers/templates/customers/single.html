@@ -108,42 +108,58 @@
             </section>
             -->
 
-            <section style="background: #f7f7f7" class="p-3">
+            <section class="p-3 border border-dashed border-gray-300 rounded-sm">
                 <h2 class="text-text text-2xl">Projects</h2>
                 <div class="flex items-center gap-1">
-                    <hr class="w-full">
+                    <hr class="w-full border-dashed border-gray-400">
                     <button title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
                 </div>
+            </section>
+
+            <section class="flex flex-col">
+                <label for="related_files" class="text-sm font-medium text-text">Upload Files <span class="text-gray-400">(jpg, png, pdf)</span></label>
+                <input type="file" id="related_files" class="border border-dashed border-gray-300 text-gray-300 text-center rounded-sm p-5">
             </section>
 
             <section class="mb-4 p-2">
                 <div class="flex flex-col">
                     <label class="text-sm font-medium text-text">Comments:</label>
-                    <textarea name="comments" id="comments" rows="6" class="border border-gray-300 rounded px-2 py-1"></textarea>
+                    <textarea name="comments" id="comments" rows="6" class="border border-gray-300 rounded px-2 py-1">{{ customer.comments }}</textarea>
                 </div>
             </section>
 
         </form>
     </div>
-    <div class="bg-bg p-5 rounded-lg shadow space-y-4">
+    <div class="bg-bg p-5 rounded-lg shadow space-y-4 relative">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl">Assigned Users</h2>
-            <button title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
+            <h2 class="text-xl">Assigned Employees</h2>
+            <button id="assignBtn" title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
         </div>
-        <hr>
+        <hr class="border-gray-200">
         {% for user in customer.assigned_to.all %}
-            <div class="flex items-center gap-2">
-                <div class="shrink-0 rounded-full overflow-hidden w-[32px] h-[32px]">
-                    <img src="{{ user.profile.avatar.url }}" alt="User Avatar">
-                </div>
-                <p class="text-text text-lg">{{ user.username }}</p>
-            </div>
+            {% include 'components/user.html' %}
         {% endfor %}
+        <div id="employeeOverlay" class="hidden z-20 absolute top-14 right-0 p-4 rounded-lg shadow bg-bg w-[80%]">
+            <div class="flex flex-col gap-4">
+                <h3>Select:</h3>
+                <hr>
+                <div id="employeesList" class="space-y-5">
+                    {% for user in users %}
+                        {% if user in customer.assigned_to.all %}
+                            <div class="my-2 p-1 bg-gray-100 hover:cursor-pointer">{% include 'components/user.html' %}</div>
+                        {% else %}
+                            <div class="my-2 p-1 hover:bg-gray-100 hover:cursor-pointer">{% include 'components/user.html' %}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+<div id="employeeOverlayBg" class="hidden z-10 absolute top-0 left-0 w-full h-full"></div>
 
 {% endblock %}
 
 {% block extra_scripts %}
-
+<script src="{% static 'js/customer.js' %}"></script>
 {% endblock %}

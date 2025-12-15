@@ -24,7 +24,7 @@
         </form>
     </div>
     <div>
-        <button class="px-3 py-2 bg-brand-400 hover:cursor-pointer flex items-center gap-2" id="addLead">New Lead <img src="/static/img/NewLead.svg" alt="Add Lead Icon" height="20px" width="20px"></button>
+        <button id="newLeadBtn" class="px-3 py-2 bg-brand-400 hover:cursor-pointer flex items-center gap-2" id="addLead">New Lead <img src="/static/img/NewLead.svg" alt="Add Lead Icon" height="20px" width="20px"></button>
     </div>
 </div>
 
@@ -54,7 +54,7 @@
                         {{ customer.first_name }} {{ customer.last_name }}
                         <a class="hidden group-hover:block absolute top-0 left-[-30px] z-50 p-1 border-1 bg-bg shadow-sm" href="/customer/{{ customer.id }}"><img width="20px" height="20px" src="/static/img/PersonIcon.svg" alt="Edit Icon"></a>
                     </p></td>
-                    <td class="p-3 text-nowrap">{{ customer.company_name }}</td>
+                    <td class="p-3 text-nowrap">{{ customer.company.company_name }}</td>
                     <td class="p-3 text-nowrap">{{ customer.email }}</td>
                     <td class="p-3 text-nowrap">{{ customer.phone_number }}</td>
                     <td class="p-3 text-nowrap">
@@ -81,10 +81,7 @@
                         <div class="h-[40px] overflow-y-scroll space-y-1">
                             {% for user in customer.assigned_to.all %}
                                 <div class="flex items-center gap-2">
-                                    <div class="shrink-0 rounded-full overflow-hidden w-[28px] h-[28px]">
-                                        <img src="{{ user.profile.avatar.url }}" alt="User Avatar">
-                                    </div>
-                                    <p class="text-text text-base">{{ user.username }}</p>
+                                    {% include 'components/user.html' %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -98,6 +95,91 @@
         </tbody>
     </table>
 </div>
+
+<!-- START -- NEW LEAD FORM -->
+<div id="newLeadFormOverlay" class="z-20 hidden p-5 rounded-lg bg-bg shadow space-y-4 overflow-y-scroll absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <h2 class="text-2xl text-text">Add Lead:</h2>
+    <hr>
+    <form id="newLeadForm" method="POST" action="">
+        {% csrf_token %}
+        <section class="grid grid-cols-2 items-center gap-6 p-2">
+            <div class="flex flex-col">
+                <label for="firstName" class="text-sm font-medium text-text">First Name:</label>
+                <input type="text" placeholder="First Name" name="firstName" id="firstName"
+                       class="border border-gray-300 rounded px-2 py-1">
+            </div>
+
+            <div class="flex flex-col">
+                <label for="lastName" class="text-sm font-medium text-text">Last Name:</label>
+                <input type="text" placeholder="Last Name" name="lastName" id="lastName"
+                       class="border border-gray-300 rounded px-2 py-1">
+            </div>
+        </section>
+        <section class="grid grid-cols-1 items-center gap-6 p-2">
+            <div class="flex flex-col">
+                <label for="email" class="text-sm font-medium text-text">Email:</label>
+                <input type="email" placeholder="Email" name="email" id="email"
+                       class="border border-gray-300 rounded px-2 py-1">
+            </div>
+
+            <div class="flex flex-col">
+                <label for="phoneNumber" class="text-sm font-medium text-text">Phone:</label>
+                <input type="text" placeholder="Phone number" name="phoneNumber" id="phoneNumber"
+                       class="border border-gray-300 rounded px-2 py-1">
+            </div>
+        </section>
+        <section class="grid grid-cols-2 items-center gap-6 mb-4 p-2">
+            <div class="flex flex-col">
+                <label for="value" class="text-sm font-medium text-text">Value:</label>
+                <input type="number" step="0.01" placeholder="Value" name="value" id="value"
+                       class="border border-gray-300 rounded px-2 py-1">
+            </div>
+        </section>
+
+        <section class="flex items-center gap-6 mb-4 p-2">
+        <div class="flex gap-3 items-center">
+        <label for="new_source">Source</label>
+        <select id="new_source" name="source" class="pl-1 py-1 pr-2 text-sm bg-bg border-1 rounded-sm">
+          {% for source in sources %}
+            <option value="{{ source.id }}">{{ source.name }}</option>
+          {% endfor %}
+        </select>
+        </div>
+        <div class="flex gap-3 items-center">
+        <label for="new_lead_status">Lead Status</label>
+        <select id="new_lead_status" name="lead_status" class="pl-1 py-1 pr-2 text-sm bg-bg border-1 rounded-sm">
+          {% for status in lead_status %}
+            <option value="{{ status.id }}">{{ status.name }}</option>
+          {% endfor %}
+        </select>
+        </div>
+        </section>
+
+        <section>
+            <input type="checkbox" id="companyDetailsFlag" name="companyDetailsFlag">
+            <label for="companyDetailsFlag">For Company?</label>
+            <div id="companyDetailsForm" class="hidden grid grid-cols-1 items-center gap-3 mt-3 mb-6">
+
+                <div class="flex flex-col">
+                <label for="companyName" class="text-sm font-medium text-text">Company Name:</label>
+                <input type="text" placeholder="Company Name" name="companyName" id="companyName"
+                       class="border border-gray-300 rounded px-2 py-1">
+                </div>
+                <div class="flex flex-col">
+                <label for="vatID" class="text-sm font-medium text-text">VAT ID:</label>
+                <input type="text" placeholder="VAT ID" name="vatID" id="vatID"
+                       class="border border-gray-300 rounded px-2 py-1">
+                </div>
+
+            </div>
+        </section>
+
+        <div class="flex justify-end">
+            <button id="createLeadBtn" type="submit" class="px-3 py-2 bg-brand-400 hover:cursor-pointer">Create Lead</button>
+        </div>
+    </form>
+</div>
+<div class="absolute top-0 left-0 w-full h-full z-10 bg-black opacity-5 hidden" id="backgroundOverlay"></div>
 
 {% endblock %}
 

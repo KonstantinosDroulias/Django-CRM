@@ -1,5 +1,7 @@
 {% load static %}
-
+{% if user.is_superuser %}
+    <div class="p-2 w-full text-sm text-bg bg-blue-900"><p>Go to admin dashboard <a class="text-brand-400" href="/admin">Click</a></p></div>
+{% endif %}
 <div class="flex items-center">
     <div class="border-r border-b border-gray-200 hidden md:block max-w-[240px] p-5 shrink-0">
         <a href="/"><img src="{% static 'img/logo.png' %}" alt="Clerio Logo" ></a>

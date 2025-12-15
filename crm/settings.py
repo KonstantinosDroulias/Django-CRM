@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'core',
     'users',
     'dashboard',
+    'company',
     'customers',
     'projects',
     'todo'

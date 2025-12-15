@@ -1,0 +1,21 @@
+<div class="flex items-center gap-2">
+    {% if user.groups.first.name == 'Manager'  %}
+        <div class="relative" title="Manager">
+    	<div class="border-2 border-orange-300 shrink-0 rounded-full overflow-hidden w-[32px] h-[32px]">
+            <img src="{{ user.profile.avatar.url }}" alt="User Avatar">
+        </div>
+            {% load static %}
+            <img src="/static/img/star.svg" alt="Star Icon" width="16px" class="absolute top-[-15px] right-0 z-10 text-shadow translate-y-1/2">
+        </div>
+        {% elif user.groups.first.name == 'Admin'  %}
+        <div title="Admin" class="border-2 border-brand-400 shrink-0 rounded-full overflow-hidden w-[32px] h-[32px]">
+            <img src="{{ user.profile.avatar.url }}" alt="User Avatar">
+        </div>
+        {% else %}
+        <div title="Employee" class="shrink-0 rounded-full overflow-hidden w-[32px] h-[32px]">
+            <img src="{{ user.profile.avatar.url }}" alt="User Avatar">
+        </div>
+    {% endif %}
+
+    <p class="text-text text-lg">{{ user.username }}</p>
+</div>

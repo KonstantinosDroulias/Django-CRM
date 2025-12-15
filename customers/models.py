@@ -1,6 +1,9 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from company.models import Company
+
+
 # Create your models here.
 
 class Source(models.Model):
@@ -20,24 +23,36 @@ class LeadStatus(models.Model):
 class Customer(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    company_name = models.CharField(max_length=100)
-    vat_id = models.CharField(max_length=100)
     email = models.EmailField()
     phone_number = models.CharField(max_length=100)
-    address = models.TextField()
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=100)
-    comments = models.TextField()
-    source = models.OneToOneField(Source, on_delete=models.CASCADE)
+    address = models.TextField(null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    state = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+    zip_code = models.CharField(max_length=100, null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE)
     lead_status = models.ForeignKey(LeadStatus, on_delete=models.CASCADE)
     assigned_to = models.ManyToManyField(User)
-    last_contact = models.DateField()
-    next_contact = models.DateField()
-    value = models.DecimalField(decimal_places=2, max_digits=10)
+    last_contact = models.DateField(null=True, blank=True)
+    next_contact = models.DateField(null=True, blank=True)
+    value = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True )
+    files = models.FileField('customer/files', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
+
     def __str__(self):
         return f"{self.first_name}, {self.last_name}"
+
+def customer_file_path(instance, filename):
+    return f"customers/{instance.customer.name}/{filename}"
+
+class CustomerFiles(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    file = models.FileField(upload_to=customer_file_path)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.customer.first_name}: {self.file.name}"
