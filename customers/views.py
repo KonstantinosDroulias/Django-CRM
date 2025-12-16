@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
 from company.models import Company
@@ -28,8 +28,8 @@ def index(request):
     return  render(request, 'customers/index.html', context)
 
 def customer(request, pk):
-    lead_status = LeadStatus.objects.filter(id=pk)
-    sources = Source.objects.filter(id=pk)
+    lead_status = LeadStatus.objects.all()
+    sources = Source.objects.all()
     customer = Customer.objects.get(id=pk)
     users = User.objects.all()
     context = {
@@ -39,6 +39,13 @@ def customer(request, pk):
         'users': users,
     }
     return render(request, 'customers/single.html', context)
+
+@require_POST
+@login_required
+def delete_customer(request, pk):
+    customer = Customer.objects.get(id=pk)
+    customer.delete()
+    return redirect('/customers')
 
 @require_POST
 @login_required
@@ -112,7 +119,7 @@ def add_customer(request):
             return JsonResponse({"errors": {"company.name": "Company name is required."}}, status=400)
 
         company_obj = Company.objects.create(
-            name=company_name,
+            company_name=company_name,
             vat_id=vat_id if vat_id else None,
         )
 

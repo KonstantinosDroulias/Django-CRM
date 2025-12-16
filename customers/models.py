@@ -36,7 +36,7 @@ class Customer(models.Model):
     assigned_to = models.ManyToManyField(User)
     last_contact = models.DateField(null=True, blank=True)
     next_contact = models.DateField(null=True, blank=True)
-    value = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True )
+    value = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True, default=0)
     files = models.FileField('customer/files', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
