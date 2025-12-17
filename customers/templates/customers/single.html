@@ -5,9 +5,14 @@
 
 {% block body %}
 
-<div class="flex justify-end items-center p-2w-full gap-4">
-    <button title="Delete Customer" class="px-2 py-2 bg-error shrink-0 flex items-center gap-3 hover:cursor-pointer rounded-sm shadow" id="deleteTrigger"><img src="{% static 'img/trash.svg' %}" alt="Trash Icon"></button>
-    <button title="Save Changes" class="px-2 py-2 bg-bg shrink-0 flex items-center gap-3 hover:cursor-pointer shadow" id="updateCustomer"><img src="{% static 'img/save.svg' %}" alt="Save Icon"></button>
+<div class="flex justify-between items-center p-2w-full">
+    <div>
+        <a class="text-text" href="/customers">&larr; Go Back</a>
+    </div>
+    <div class="flex justify-end items-center gap-4">
+    <button title="Delete Customer" class="px-2 py-2 bg-error shrink-0 flex items-center gap-3 hover:cursor-pointer rounded-sm shadow-sm" id="deleteTrigger"><img src="{% static 'img/trash.svg' %}" alt="Trash Icon"></button>
+    <button title="Save Changes" class="px-2 py-2 bg-bg shrink-0 flex items-center gap-3 hover:cursor-pointer rounded-sm shadow-sm" id="updateCustomer"><img src="{% static 'img/save.svg' %}" alt="Save Icon"></button>
+    </div>
 </div>
 
 <div class="z-30 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden flex flex-col p-4 rounded-lg bg-bg shadow gap-4" id="confirmModule">

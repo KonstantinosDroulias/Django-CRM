@@ -34,6 +34,7 @@ urlpatterns = [
     path('', include('todo.urls')),
     path('', include('company.urls')),
     path('', include('customers.urls')),
+    path('api/v1/customers/', include('customers.api.urls')),
 
 ]
 

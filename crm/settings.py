@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'company',
     'customers',
     'projects',
-    'todo'
+    'todo',
+    'rest_framework',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "tailwind"
