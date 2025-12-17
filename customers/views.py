@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_POST
 
 from company.models import Company
-from customers.models import LeadStatus, Source, Customer
+from customers.models import LeadStatus, Source, Customer, Note
 
 
 # Create your views here.
@@ -32,12 +32,14 @@ def customer(request, pk):
     lead_status = LeadStatus.objects.all()
     sources = Source.objects.all()
     customer = Customer.objects.get(id=pk)
+    notes = Note.objects.all()
     users = User.objects.all()
     context = {
         'lead_status': lead_status,
         'sources': sources,
         'customer': customer,
         'users': users,
+        'notes': notes,
     }
     return render(request, 'customers/single.html', context)
 

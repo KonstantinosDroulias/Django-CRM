@@ -20,6 +20,16 @@ class LeadStatus(models.Model):
     def __str__(self):
         return self.name
 
+class Note(models.Model):
+    customer = models.ForeignKey('Customer', related_name='notes', on_delete=models.CASCADE)
+    title = models.CharField(max_length=100, null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
 class Customer(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -30,7 +40,6 @@ class Customer(models.Model):
     state = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
     zip_code = models.CharField(max_length=100, null=True, blank=True)
-    comments = models.TextField(null=True, blank=True)
     source = models.ForeignKey(Source, on_delete=models.CASCADE)
     lead_status = models.ForeignKey(LeadStatus, on_delete=models.CASCADE)
     assigned_to = models.ManyToManyField(User)

@@ -62,7 +62,7 @@ async function loadTable() {
             </td>
         </tr>
     `;
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    //await new Promise(resolve => setTimeout(resolve, 2000));
     try {
         const res = await fetch('/api/v1/customers/list/');
 
