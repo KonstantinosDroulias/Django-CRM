@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
 from company.models import Company
@@ -29,10 +29,10 @@ def index(request):
     return render(request, 'customers/index.html', context)
 
 def customer(request, pk):
+    customer = get_object_or_404(Customer, id=pk)
     lead_status = LeadStatus.objects.all()
     sources = Source.objects.all()
-    customer = Customer.objects.get(id=pk)
-    notes = Note.objects.all()
+    notes = Note.objects.filter(customer=customer).order_by('-created_at')
     users = User.objects.all()
     context = {
         'lead_status': lead_status,
