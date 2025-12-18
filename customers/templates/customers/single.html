@@ -134,7 +134,33 @@
             -->
 
             <section class="p-3 border border-dashed border-gray-300 rounded-sm">
-                <h2 class="text-text text-2xl">Projects</h2>
+                <h2 class="text-text text-2xl mb-4">Projects</h2>
+                {% for project in projects %}
+                <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
+                    <a href="project/{{ project.id }}">
+                    <h2 class="text-3xl font-semibold mb-4 text-text">{{ project.name }}</h2>
+                    <div class="flex gap-3">
+                        <div class="flex gap-3 flex-col">
+                            <div class="relative p-2 border border-gray-400 rounded-sm">{{ project.description }} <p class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</p></div>
+                            <div>
+                            <p class="text-text text-lg mb-1">Users Contributed:</p>
+                            <div class="flex gap-3 items-center">
+                            {% for user in project.contributed.all %}
+                                {% include 'components/user.html' %}
+                            {% endfor %}
+                            </div>
+                            </div>
+                        </div>
+                        <div>
+                            <p>Price: <strong>{{ project.price }}€</strong></p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <p class="text-gray-400">Updated At: {{ project.updated_at|date:"M d, Y" }}</p>
+                    </div>
+                    </a>
+                </div>
+                {% endfor %}
                 <div class="flex items-center gap-1">
                     <hr class="w-full border-dashed border-gray-400">
                     <button title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>

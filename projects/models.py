@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from company.models import Company
 from customers.models import Customer
@@ -7,6 +8,7 @@ class Project(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    contributed = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

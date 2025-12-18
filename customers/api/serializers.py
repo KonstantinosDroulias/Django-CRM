@@ -57,3 +57,4 @@ class CustomerSerializer(serializers.ModelSerializer):
         customer.assigned_to.add(user)
 
         return customer
+

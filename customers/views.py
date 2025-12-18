@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 
 from company.models import Company
 from customers.models import LeadStatus, Source, Customer, Note
+from projects.models import Project
 
 
 # Create your views here.
@@ -33,12 +34,14 @@ def customer(request, pk):
     lead_status = LeadStatus.objects.all()
     sources = Source.objects.all()
     notes = Note.objects.filter(customer=customer).order_by('-created_at')
+    projects = Project.objects.filter(customer=customer)
     users = User.objects.all()
     context = {
         'lead_status': lead_status,
         'sources': sources,
         'customer': customer,
         'users': users,
+        'projects': projects,
         'notes': notes,
     }
     return render(request, 'customers/single.html', context)
