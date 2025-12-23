@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Project {{ project.name }}{% endblock %}
+
+{% block body %}
+
+<section class="grid gap-5 overflow-x-scroll" style="grid-template-columns: repeat({{ stages.count }}, 420px);">
+    {% for stage in stages %}
+    <div class="p-5 rounded-lg shadow bg-gray-50">
+        <h2 class="text-text text-2xl mb-3">
+            {{ stage.name }}
+        </h2>
+        <hr>
+        <div class="flex flex-col gap-4 py-2">
+        {% for project in stage.project_set.all %}
+            <div class="rounded bg-bg p-4 shadow-sm flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold">{{ project.name }}</h3>
+                <div>
+                    {% if project.priority == 'low' %}
+                        <img title="Low priority" src="{% static 'img/Default.svg' %}" alt="Low priority flag">
+                    {% elif project.priority == 'medium' %}
+                        <img title="Medium priority" src="{% static 'img/Medium.svg' %}" alt="Medium priority flag">
+                    {% elif project.priority == 'high' %}
+                        <img title="High priority" src="{% static 'img/High.svg' %}" alt="High priority flag">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mb-2">
+                {{ project.description|truncatechars:80 }}
+            </div>
+            <div class="flex justify-between items-center">
+                {% if project.company %}
+                    <div class="bg-text text-bg rounded-lg p-2">{{ project.company.name }}</div>
+                {% else %}
+                    <div></div>
+                {% endif %}
+                <div class="text-brand-400 underline hover:text-brand-200"><a href="project/{{ project.id }}">View More</a></div>
+            </div>
+            </div>
+        {% empty %}
+        <div class="flex text-center justify-center flex-col p-4 rounded-lg text-gray-400 border border-gray-400 border-dashed">
+            <p>Empty</p>
+            <p>Add project by clicking here</p>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+
+{% endblock %}

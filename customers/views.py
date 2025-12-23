@@ -4,6 +4,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
@@ -34,7 +35,8 @@ def customer(request, pk):
     lead_status = LeadStatus.objects.all()
     sources = Source.objects.all()
     notes = Note.objects.filter(customer=customer).order_by('-created_at')
-    projects = Project.objects.filter(customer=customer)
+    projects = Project.objects.filter(customers=customer)
+    project_total = projects.aggregate(Sum('price'))['price__sum']
     users = User.objects.all()
     context = {
         'lead_status': lead_status,
@@ -42,6 +44,7 @@ def customer(request, pk):
         'customer': customer,
         'users': users,
         'projects': projects,
+        'project_total': project_total,
         'notes': notes,
     }
     return render(request, 'customers/single.html', context)

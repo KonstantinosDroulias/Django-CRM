@@ -133,15 +133,28 @@
             </section>
             -->
 
-            <section class="p-3 border border-dashed border-gray-300 rounded-sm">
+            <section class="p-3 border border-dashed border-gray-300 rounded-sm bg-gray-50 shadow-inner">
                 <h2 class="text-text text-2xl mb-4">Projects</h2>
                 {% for project in projects %}
                 <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
-                    <a href="project/{{ project.id }}">
-                    <h2 class="text-3xl font-semibold mb-4 text-text">{{ project.name }}</h2>
+                    <a href="/project/{{ project.id }}">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-3xl font-semibold mb-4 text-text">{{ project.name }}</h2>
+                        <div>
+                            {% if project.priority == 'low' %}
+                                <img title="Low priority" src="{% static 'img/Default.svg' %}" alt="Low priority flag">
+                            {% elif project.priority == 'medium' %}
+                                <img title="Medium priority" src="{% static 'img/Medium.svg' %}" alt="Medium priority flag">
+                            {% elif project.priority == 'high' %}
+                                <img title="High priority" src="{% static 'img/High.svg' %}" alt="High priority flag">
+                            {% endif %}
+                        </div>
+                    </div>
                     <div class="flex gap-3">
                         <div class="flex gap-3 flex-col">
+                            {% if project.description %}
                             <div class="relative p-2 border border-gray-400 rounded-sm">{{ project.description }} <p class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</p></div>
+                            {% endif %}
                             <div>
                             <p class="text-text text-lg mb-1">Users Contributed:</p>
                             <div class="flex gap-3 items-center">
@@ -155,8 +168,13 @@
                             <p>Price: <strong>{{ project.price }}€</strong></p>
                         </div>
                     </div>
-                    <div class="flex justify-end">
-                        <p class="text-gray-400">Updated At: {{ project.updated_at|date:"M d, Y" }}</p>
+                    <div class="flex justify-between items-center mt-6">
+                        <div>
+                            <p>Project Stage: {{ project.stage.name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400">Updated At: {{ project.updated_at|date:"M d, Y" }}</p>
+                        </div>
                     </div>
                     </a>
                 </div>
@@ -188,6 +206,7 @@
 
         </form>
     </div>
+    <div class="space-y-6">
     <div class="bg-bg p-5 rounded-lg shadow space-y-4 relative">
         <div class="flex items-center justify-between">
             <h2 class="text-xl">Assigned Employees</h2>
@@ -212,6 +231,20 @@
                 </div>
             </div>
         </div>
+    </div>
+    {% if project_total %}
+    <div class="bg-bg p-5 rounded-lg shadow space-y-4">
+        <div>
+        <h2 class="mb-2 text-lg font-semibold">Customer Totals</h2>
+        <hr>
+        </div>
+        {% for project in projects %}
+        <p>{{ project.name|truncatechars:20 }} - {{ project.price }}€</p>
+        {% endfor %}
+        <hr class="border border-dashed border-gray-300">
+        <p class="text-text">Total: <strong>{{ project_total }}€</strong></p>
+    </div>
+    {% endif %}
     </div>
 </section>
 <div id="employeeOverlayBg" class="hidden z-10 absolute top-0 left-0 w-full h-full"></div>
