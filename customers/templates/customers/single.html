@@ -134,7 +134,9 @@
             -->
 
             <section class="p-3 border border-dashed border-gray-300 rounded-sm bg-gray-50 shadow-inner">
+                {{ request.user.id|json_script:"current-user-id" }}
                 <h2 class="text-text text-2xl mb-4">Projects</h2>
+                <div id="projectsContainer">
                 {% for project in projects %}
                 <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
                     <a href="/project/{{ project.id }}">
@@ -179,9 +181,10 @@
                     </a>
                 </div>
                 {% endfor %}
+                </div>
                 <div class="flex items-center gap-1">
                     <hr class="w-full border-dashed border-gray-400">
-                    <button title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
+                    <button id="addProjectBtn" title="Add Project" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
                 </div>
             </section>
 

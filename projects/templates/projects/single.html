@@ -9,7 +9,7 @@
 <section class="flex items-center justify-between">
         <div class="flex items-center gap-1">
             <p class="text-text">Project Stage:</p>
-            <select name="projectStage" id="projectStage" class="border-none p-1">
+            <select name="projectStage" id="projectStage" class="border-none p-1 z-10">
                 {% for stage in stages %}
                     <option value="{{ stage.id }}">
                         {{ stage.name }}
