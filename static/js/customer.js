@@ -75,128 +75,225 @@ const priorityOptions = priorities.map(([value, label]) => {
 // PROJECT ASSIGNED USERS FUNCTIONALITY START ********
 const currentUserId = JSON.parse(document.getElementById('current-user-id').textContent);
 
-async function getUsers() {
-    try {
-        const response = await fetch('/api/v1/users/list/');
-        if(response.ok) {
-            const users = await response.json();
-            return users;
-        } else {
-            console.error('Server returned an error:', response.status);
-            return [];
+class UserSelector {
+    constructor({ triggerBtnId, relativePlacement, targetWrapperId, initialUserIds = [], modalTitle = "Select Users" }) {
+        this.triggerBtn = document.getElementById(triggerBtnId);
+        this.relativeDiv = document.getElementById(relativePlacement);
+        this.targetWrapper = document.getElementById(targetWrapperId);
+        this.selectedUsers = new Set(initialUserIds);
+        this.allUsers = [];
+        this.modalTitle = modalTitle;
+        this.isOpen = false;
+
+        // START - This was AI assisted
+        this.instanceId = Math.random().toString(36).substr(2, 9);
+        this.modalId = `modal-${this.instanceId}`;
+        this.overlayId = `overlay-${this.instanceId}`;
+        this.listContainerId = `list-${this.instanceId}`;
+        // END - This was AI assisted
+
+        this.init();
+    }
+
+    async init() {
+        this.createModalDOM();
+
+        this.modalDiv = document.getElementById(this.modalId);
+        this.overlay = document.getElementById(this.overlayId);
+        this.listContainer = document.getElementById(this.listContainerId);
+
+        this.attachEventListeners();
+
+        await this.fetchUsers();
+        this.renderSummary();
+    }
+
+    createModalDOM() {
+        const modalHTML = `
+            <div id="${this.modalId}" class="absolute z-50 top-0 right-0 flex flex-col bg-bg shadow rounded p-4 hidden w-max space-y-2">
+                <h3 class="font-bold text-xl mb-2 text-text">${this.modalTitle}</h3>
+                <hr>
+                <div id="${this.listContainerId}" class="flex flex-col max-h-60 overflow-y-auto gap-1">
+                    <div class="text-gray-400 text-sm p-2">Loading...</div>
+                </div>
+            </div>
+            <div id="${this.overlayId}" class="fixed top-0 left-0 w-full h-full z-40 hidden"></div>
+        `;
+        this.relativeDiv.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    attachEventListeners() {
+        // Toggle Open/Close on Trigger Button
+        if(this.triggerBtn) {
+            this.triggerBtn.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent form submission if inside a form
+                this.toggleModal();
+            });
         }
 
-    } catch (err) {
-        console.log('Error loading users:', err);
-        return [];
+        // Close on Overlay Click
+        this.overlay.addEventListener('click', () => this.closeModal());
+
+        // Event Delegation: Handle User Clicks inside the list
+        this.listContainer.addEventListener('click', (e) => {
+            // Find the closest parent div that has a data-user-id attribute
+            const userRow = e.target.closest('[data-user-id]');
+            if (userRow) {
+                const userId = parseInt(userRow.dataset.userId);
+                this.toggleUserSelection(userId);
+            }
+        });
     }
-}
 
-async function renderUserList() {
-    const users = await getUsers();
+    // --- LOGIC ---
 
-    const userOptions = users.map(({id, username, avatar}) => {
+    async fetchUsers() {
+        if (this.allUsers.length > 0) return; // Don't fetch if we already have them
 
-        const isSelected = selectedUsers.has(id);
-
-        const bgClass = isSelected
-            ? 'bg-gray-100'
-            : 'bg-white hover:bg-gray-100';
-
-        return `
-        <div onclick="toggleUser(${id})" class="flex items-center gap-4 p-2 mb-2 border rounded-md cursor-pointer transition-colors ${bgClass}">
-            <div class="w-8 h-8 flex-shrink-0 overflow-hidden rounded-full">
-                <img src="${avatar || '/static/default-avatar.png'}">
-            </div>
-            <div>
-                ${username}
-            </div>
-        </div>
-        `;
-    }).join('');
-}
-
-let selectedUsers = new Set([currentUserId]);
-
-function toggleUser(id) {
-    if (selectedUsers.has(id)) {
-        selectedUsers.delete(id)
-    } else {
-        selectedUsers.add(id)
+        try {
+            const response = await fetch('/api/v1/users/list/');
+            if (response.ok) {
+                this.allUsers = await response.json();
+            } else {
+                console.error("Failed to fetch users");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     }
-}
 
-const userSelectModal = `
-    <div id="userSelectModalDiv" class="absolute z-20 top-0 right-0 flex flex-col bg-white shadow-lg border rounded-lg p-4 w-64 hidden">
-        <h3 class="font-bold mb-2 text-gray-700">Select Users:</h3>
-        
-        <div id="users-list-container" class="flex flex-col max-h-60 overflow-y-auto">
-        </div>
-    </div>
-
-    <div id="userSelectOverlay" class="fixed inset-0 bg-black bg-opacity-20 z-10 hidden" onclick="closeModal()"></div>
-`;
-
-document.body.insertAdjacentHTML('beforeend', userSelectModal);
-
-const userSelectModalDiv = document.getElementById('userSelectModalDiv');
-const userSelectOverlay = document.getElementById('userSelectOverlay');
-
-const assignProjectUsersBtn = document.getElementById('assignProjectUsers');
-
-const selectedUsersWrapper = document.getElementById('selectedUsersWrapper');
-
-let isSelectUsersOpen = false;
-assignProjectUsersBtn.addEventListener(() => {
-    if (isSelectUsersOpen) {
-        closeProjectUsers()
-    } else {
-        openProjectUsers()
+    toggleModal() {
+        if (this.isOpen) {
+            this.closeModal();
+        } else {
+            this.openModal();
+        }
     }
-})
 
-userSelectOverlay.addEventListener(() => {
-    if (isSelectUsersOpen) {
-        closeProjectUsers()
-    } else {
-        openProjectUsers()
+    async openModal() {
+        this.isOpen = true;
+        this.modalDiv.classList.remove('hidden');
+        this.overlay.classList.remove('hidden');
+
+        // Ensure we have data, then render the list
+        await this.fetchUsers();
+        this.renderList();
     }
-})
 
-function openProjectUsers() {
-    isSelectUsersOpen = false;
-    userSelectModalDiv.classList.remove('hidden');
-    userSelectOverlay.classList.remove('hidden');
-}
+    closeModal() {
+        this.isOpen = false;
+        this.modalDiv.classList.add('hidden');
+        this.overlay.classList.add('hidden');
 
-function closeProjectUsers() {
-    isSelectUsersOpen = true;
-    userSelectModalDiv.classList.add('hidden');
-    userSelectOverlay.classList.add('hidden');
-    selectedUsersWrapper.innerHTML = loadSelectedUsers();
-}
+        // Update the summary view (the avatars on the main page)
+        this.renderSummary();
+    }
 
-async function loadSelectedUsers() {
-    const users = await getUsers();
+    toggleUserSelection(id) {
+        if (this.selectedUsers.has(id)) {
+            this.selectedUsers.delete(id);
+        } else {
+            this.selectedUsers.add(id);
+        }
+        // Re-render the list immediately to show blue highlight
+        this.renderList();
+    }
 
-    const selectedUsersHTML = users
-        .filter(user => selectedUsers.has(user.id))
-        .map(user => {
+    // --- RENDERING ---
+
+    renderList() {
+        this.listContainer.innerHTML = this.allUsers.map(user => {
+            const isSelected = this.selectedUsers.has(user.id);
+            const bgClass = isSelected ? 'bg-brand-50 border-brand-400' : 'bg-white border-transparent hover:bg-gray-50';
+
+            // Note: We use data-user-id instead of onclick="func()"
             return `
-            <div class="flex items-center gap-4">
-                <div class="overflow-hidden rounded-full w-8 h-8">
-                    <img src="${user.avatar}" alt="Avatar" class="w-full h-full object-cover">
-                </div> 
-                ${user.username}
-            </div>
+                <div 
+                    data-user-id="${user.id}" 
+                    class="flex items-center gap-3 p-2 border rounded-md cursor-pointer transition-all select-none ${bgClass}"
+                >
+                    <div class="w-9 h-9 flex-shrink-0 overflow-hidden rounded-full">
+                        <img src="${user.avatar || '/static/default-avatar.png'}" class="w-full h-full">
+                    </div>
+                    <div class="text-sm font-medium text-text">${user.username}</div>
+                    ${ isSelected ? '<span class="ml-auto text-brand-400 font-bold">✓</span>' : '' }
+                </div>
             `;
-        })
-        .join('');
+        }).join('');
+    }
 
-    return selectedUsersHTML;
+    renderSummary() {
+        // Filter the cached users to find the selected ones
+        const selectedObjects = this.allUsers.filter(u => this.selectedUsers.has(u.id));
+
+        if (this.targetWrapper) {
+            if (selectedObjects.length === 0) {
+                this.targetWrapper.innerHTML = '<span class="text-gray-400 text-sm">No users assigned</span>';
+                return;
+            }
+
+            this.targetWrapper.innerHTML = selectedObjects.map(user => `
+                <div class="flex items-center gap-2 mb-1" title="${user.username}">
+                    <div class="w-9 h-9 overflow-hidden rounded-full border border-gray-300">
+                        <img src="${user.avatar || '/static/default-avatar.png'}" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            `).join('');
+        }
+    }
+
+    // Helper to get data out when you submit the form
+    getSelectedIds() {
+        return Array.from(this.selectedUsers);
+    }
 }
 
 // PROJECT ASSIGNED USERS FUNCTIONALITY END ********
+
+// START PROJECT STAGE
+async function getStages() {
+    try {
+        const response = await fetch('/api/v1/projects/stages/');
+        if (!response.ok) {
+        throw new Error('Server error: ' + response.status);
+        }
+        const data = await response.json();
+        return data;
+    } catch (e) {
+        console.log("Error: " + e);
+    }
+}
+async function initProjectStages() {
+    const wrapper = document.getElementById('new-project-stages-wrapper');
+
+    if (!wrapper) {
+        console.error("Could not find new-project-stages-wrapper");
+        return;
+    }
+
+    wrapper.innerHTML = `<select class="border rounded p-1" disabled><option>Loading...</option></select>`;
+
+    const stages = await getStages();
+
+    const optionsHTML = stages.map(stage => {
+        return `<option value="${stage.id}">${stage.name}</option>`;
+    }).join('');
+
+    wrapper.innerHTML = `
+        <select id="projectStages" name="stage_id" class="border rounded p-1">
+            ${optionsHTML}
+        </select>
+    `;
+}
+
+// END PROJECT STAGE
+
+const projectAssigner = new UserSelector({
+    triggerBtnId: 'assignProjectUsersBtn',
+    targetWrapperId: 'selectedUsersWrapper',
+    initialUserIds: [currentUserId],
+    modalTitle: 'Assign Project Members'
+});
 
 const projectBlock = `
     <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
@@ -205,43 +302,60 @@ const projectBlock = `
             <h2 class="text-3xl font-semibold mb-4 text-text"><input type="text" name="projectNameField" placeholder="Project Title"></h2>
             <div>
                 <label for="priority" class="mr-2">Priority:</label>
-                <select id="priority" name="priority" class="border rounded p-2">
+                <select id="priority" name="priority" class="border rounded p-1">
                     ${priorityOptions} 
                 </select>
             </div>
         </div>
-        <div class="flex gap-3">
-            <div class="flex gap-3 flex-col">
-                <div class="relative p-2 border border-gray-400 rounded-sm"><textarea id="description" name="description"></textarea> <label for="description" class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</label></div>
-                <div class="flex justify-between items-center">
-                <p class="text-text text-lg mb-1">Assigned Project Users:</p>
-                <div class="relative">
-                <button id="assignProjectUsers" class="bg-brand-400 border-full py-1 px-2 text-sm">+</button>
-                ${userSelectModal}
-                </div>
+        <div class="flex gap-3 w-full items-start mt-3">
+            <div class="w-full flex gap-3 flex-col">
+                <div class="w-full relative p-2 border border-gray-400 rounded-sm"><textarea class="w-full focus:outline-none" id="description" name="description"></textarea> <label for="description" class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</label></div>
+                <div class="w-full flex gap-4 items-center">
+                    <p class="text-text text-lg mb-1">Assigned Project Users:</p>
+                    <div id="addProjectUserRelativeBox" class="relative">
+                        <button type="button" id="assignProjectUsersBtn" class="relative bg-brand-400 rounded-full py-1 px-2 text-sm">+</button>
+                    </div>
                 </div>
                 <div id="selectedUsersWrapper" class="flex gap-3 items-center">
                    <!-- Loaded Selected Users. Function loadSelectedUsers() -->
-                   ${loadSelectedUsers()}
-                </div>
                 </div>
             </div>
-            <div>
-                <p>Price: <strong>{{ project.price }}€</strong></p>
+            <div class="flex flex-col gap-1">
+                <label for="projectPrice">Price:</label>
+                <div class="flex items-center gap-0">
+                <input class="focus:outline-none" placeholder="0.00" type="number" id="projectPrice" name="projectPrice"><p>€</p>
+                </div>
             </div>
         </div>
         <div class="flex justify-between items-center mt-6">
-            <div>
-                <p>Project Stage: {{ project.stage.name }}</p>
+            <div class="flex items-center gap-1">
+                <label for="projectStages">Project Stage:</label>
+                <div id="new-project-stages-wrapper"></div>
             </div>
             <div>
-                <p class="text-gray-400">Updated At: {{ project.updated_at|date:"M d, Y" }}</p>
+                <button type="button" id="newProject" class="px-2 py-1 bg-brand-400 hover:cursor-pointer hover:shadow active:shadow-none transition-all">Save</button>
             </div>
         </div>
         </form>
     </div>
 `
-
+let newProjectCounter = 0
 function addProject() {
-    projectsContainer.insertAdjacentHTML('beforeend', projectBlock)
+    if (newProjectCounter === 0) {
+        projectsContainer.insertAdjacentHTML('beforeend', projectBlock)
+
+        window.newProjectAssigner = new UserSelector({
+            triggerBtnId: 'assignProjectUsersBtn',
+            relativePlacement: 'addProjectUserRelativeBox',
+            targetWrapperId: 'selectedUsersWrapper',
+            initialUserIds: [currentUserId],
+            modalTitle: 'Assign Project Members'
+        });
+        initProjectStages();
+
+        addProjectBtn.classList.add('hidden');
+        newProjectCounter += 1
+    }
+
+
 }

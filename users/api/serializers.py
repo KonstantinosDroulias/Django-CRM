@@ -6,7 +6,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar']  # Add 'avatar' to the list
+        fields = ['id', 'username', 'avatar']
 
     def get_avatar(self, obj):
         try:

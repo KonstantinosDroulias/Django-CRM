@@ -1,6 +1,8 @@
 <a href="{{ url }}" class="flex items-center p-4 gap-6 hover:bg-brand-50">
-    <div>
-        <img src="{{ img_url }}" alt="{{ alt_text }}">
+    <div class="py-0.5">
+        <img class="shrink-0 w-[26px]" src="{{ img_url }}" alt="{{ alt_text }}">
     </div>
-    {{ text }}
+    <span class="nav-link-text leading-none">
+        {{ text }}
+    </span>
 </a>
