@@ -1,7 +1,4 @@
-const assignBtn = document.getElementById("assignBtn");
-const employeeOverlay = document.getElementById("employeeOverlay");
 const list = document.getElementsByClassName("list");
-const employeeOverlayBg = document.getElementById("employeeOverlayBg");
 
 const deleteTrigger = document.getElementById("deleteTrigger");
 const confirmModule = document.getElementById("confirmModule");
@@ -31,31 +28,6 @@ function closeConfirm() {
 
 deleteCancel.addEventListener("click", closeConfirm)
 confirmOverlay.addEventListener("click", closeConfirm)
-
-let displayFlag = false;
-assignBtn.addEventListener("click", function () {
-    if (displayFlag) {
-        employeeOverlay.classList.add("hidden");
-        employeeOverlayBg.classList.add("hidden");
-        displayFlag = false;
-    } else {
-        employeeOverlay.classList.remove("hidden");
-        employeeOverlayBg.classList.remove("hidden");
-        displayFlag = true;
-    }
-})
-
-employeeOverlayBg.addEventListener("click", function () {
-    if (displayFlag) {
-        employeeOverlay.classList.add("hidden");
-        employeeOverlayBg.classList.add("hidden");
-        displayFlag = false;
-    } else {
-        employeeOverlay.classList.remove("hidden");
-        employeeOverlayBg.classList.remove("hidden");
-        displayFlag = true;
-    }
-})
 
 addProjectBtn.addEventListener('click', addProject);
 
@@ -210,13 +182,12 @@ class UserSelector {
             return `
                 <div 
                     data-user-id="${user.id}" 
-                    class="flex items-center gap-3 p-2 border rounded-md cursor-pointer transition-all select-none ${bgClass}"
+                    class="flex items-center gap-3 p-2 border  cursor-pointer transition-all select-none ${bgClass}"
                 >
                     <div class="w-9 h-9 flex-shrink-0 overflow-hidden rounded-full">
-                        <img src="${user.avatar || '/static/default-avatar.png'}" class="w-full h-full">
+                        <img src="${user.avatar || '/static/default-avatar.png'}">
                     </div>
                     <div class="text-sm font-medium text-text">${user.username}</div>
-                    ${ isSelected ? '<span class="ml-auto text-brand-400 font-bold">✓</span>' : '' }
                 </div>
             `;
         }).join('');
@@ -236,6 +207,9 @@ class UserSelector {
                 <div class="flex items-center gap-2 mb-1" title="${user.username}">
                     <div class="w-9 h-9 overflow-hidden rounded-full border border-gray-300">
                         <img src="${user.avatar || '/static/default-avatar.png'}" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <p>${user.username}</p>
                     </div>
                 </div>
             `).join('');
@@ -285,21 +259,69 @@ async function initProjectStages() {
         </select>
     `;
 }
-
 // END PROJECT STAGE
 
-const projectAssigner = new UserSelector({
-    triggerBtnId: 'assignProjectUsersBtn',
-    targetWrapperId: 'selectedUsersWrapper',
-    initialUserIds: [currentUserId],
-    modalTitle: 'Assign Project Members'
-});
+// START PROJECT SAVE
+
+async function saveNewProject(btn, users) {
+
+    btn.disabled = true;
+    btn.innerText = "Saving...";
+    try {
+        const name = document.getElementById('projectNameField').value;
+        const description = document.getElementById('projectDescriptionField').value;
+        const price = document.getElementById('projectPrice').value;
+        const priority = document.getElementById('priority').value;
+        const stage = document.getElementById('projectStages').value;
+        const currentCustomerId = JSON.parse(document.getElementById('current-customer-id').textContent);
+
+        const customers = [currentCustomerId];
+
+        const payload = {
+            name: name,
+            description: description,
+            price: price ? parseFloat(price) : 0,
+            priority: priority,
+            stage: stage,
+            contributed: users,
+            customers: customers
+        };
+
+        const response = await fetch('/api/v1/projects/', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(payload),
+        })
+
+        if (response.ok) {
+            //On going
+        } else {
+            const errorData = await response.json();
+            console.error("Save failed:", errorData);
+            alert("Error saving project: " + JSON.stringify(errorData));
+
+            btn.disabled = false;
+            btn.innerText = "Save";
+        }
+
+    } catch (error) {
+        console.error("Network Error:", error);
+        alert("Something went wrong. Check console.");
+        btn.disabled = false;
+        btn.innerText = "Save";
+    }
+}
+
+// END PROJECT SAVE
 
 const projectBlock = `
     <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
         <form>
         <div class="flex items-center justify-between">
-            <h2 class="text-3xl font-semibold mb-4 text-text"><input type="text" name="projectNameField" placeholder="Project Title"></h2>
+            <h2 class="text-3xl font-semibold mb-4 text-text"><input type="text" id="projectNameField" name="projectNameField" placeholder="Project Title"></h2>
             <div>
                 <label for="priority" class="mr-2">Priority:</label>
                 <select id="priority" name="priority" class="border rounded p-1">
@@ -309,11 +331,11 @@ const projectBlock = `
         </div>
         <div class="flex gap-3 w-full items-start mt-3">
             <div class="w-full flex gap-3 flex-col">
-                <div class="w-full relative p-2 border border-gray-400 rounded-sm"><textarea class="w-full focus:outline-none" id="description" name="description"></textarea> <label for="description" class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</label></div>
+                <div class="w-full relative p-2 border border-gray-400 rounded-sm"><textarea class="w-full focus:outline-none" id="projectDescriptionField" name="description"></textarea> <label for="description" class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</label></div>
                 <div class="w-full flex gap-4 items-center">
                     <p class="text-text text-lg mb-1">Assigned Project Users:</p>
                     <div id="addProjectUserRelativeBox" class="relative">
-                        <button type="button" id="assignProjectUsersBtn" class="relative bg-brand-400 rounded-full py-1 px-2 text-sm">+</button>
+                        <button type="button" id="assignProjectUsersBtn" class="bg-brand-400 hover:cursor-pointer rounded-full py-1 px-2 text-sm">+</button>
                     </div>
                 </div>
                 <div id="selectedUsersWrapper" class="flex gap-3 items-center">
@@ -332,19 +354,22 @@ const projectBlock = `
                 <label for="projectStages">Project Stage:</label>
                 <div id="new-project-stages-wrapper"></div>
             </div>
-            <div>
-                <button type="button" id="newProject" class="px-2 py-1 bg-brand-400 hover:cursor-pointer hover:shadow active:shadow-none transition-all">Save</button>
+            <div class="flex justify-end items-center gap-3">
+                <button type="button" id="cancelNewProject" class="px-2 py-1 bg-error text-bg hover:cursor-pointer">Cancel</button>
+                <button type="button" id="saveNewProject" class="px-2 py-1 bg-brand-400 hover:cursor-pointer">Save</button>
             </div>
         </div>
         </form>
     </div>
 `
-let newProjectCounter = 0
+let activeNewProjectCard = false
 function addProject() {
-    if (newProjectCounter === 0) {
+    if (!activeNewProjectCard) {
         projectsContainer.insertAdjacentHTML('beforeend', projectBlock)
 
-        window.newProjectAssigner = new UserSelector({
+        const saveBtn = document.getElementById('saveNewProject');
+
+        const newProjectAssigner = new UserSelector({
             triggerBtnId: 'assignProjectUsersBtn',
             relativePlacement: 'addProjectUserRelativeBox',
             targetWrapperId: 'selectedUsersWrapper',
@@ -353,9 +378,18 @@ function addProject() {
         });
         initProjectStages();
 
+        saveBtn.addEventListener('click', () => {
+            saveNewProject(saveBtn, newProjectAssigner.getSelectedIds());
+        });
         addProjectBtn.classList.add('hidden');
-        newProjectCounter += 1
+        activeNewProjectCard = !activeNewProjectCard;
     }
-
-
 }
+
+const assignUser = new UserSelector({
+    triggerBtnId: 'assignBtn',
+    relativePlacement: 'assignEmployeeRelative',
+    targetWrapperId: 'assignedEmployeeContainer',
+    initialUserIds: [currentUserId],
+    modalTitle: 'Assign Employees'
+});

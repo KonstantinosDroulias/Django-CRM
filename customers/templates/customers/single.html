@@ -4,7 +4,7 @@
 {% block title %}Lead {{ customer.name }}{% endblock %}
 
 {% block body %}
-
+{{ customer.id|json_script:"current-customer-id" }}
 <div class="flex justify-between items-center p-2w-full">
     <div>
         <a class="text-text" href="/customers">&larr; Go Back</a>
@@ -153,9 +153,9 @@
                         </div>
                     </div>
                     <div class="flex gap-3">
-                        <div class="flex gap-3 flex-col">
+                        <div class="flex gap-3 flex-col w-full">
                             {% if project.description %}
-                            <div class="relative p-2 border border-gray-400 rounded-sm">{{ project.description }} <p class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</p></div>
+                            <div class="relative p-2 border border-gray-400 rounded-sm w-full">{{ project.description }} <p class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</p></div>
                             {% endif %}
                             <div>
                             <p class="text-text text-lg mb-1">Users Contributed:</p>
@@ -190,7 +190,7 @@
 
             <section class="flex flex-col">
                 <label for="related_files" class="text-sm font-medium text-text">Upload Files <span class="text-gray-400">(jpg, png, pdf)</span></label>
-                <input type="file" id="related_files" class="border border-dashed border-gray-300 text-gray-300 text-center rounded-sm p-5">
+                <input type="file" id="related_files" multiple class="border border-dashed border-gray-300 text-gray-300 text-center rounded-sm p-5">
             </section>
 
             <section class="mb-4 p-2">
@@ -213,26 +213,15 @@
     <div class="bg-bg p-5 rounded-lg shadow space-y-4 relative">
         <div class="flex items-center justify-between">
             <h2 class="text-xl">Assigned Employees</h2>
-            <button id="assignBtn" title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
+            <div class="relative" id="assignEmployeeRelative">
+                <button id="assignBtn" title="Assign Employee" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
+            </div>
         </div>
         <hr class="border-gray-200">
+        <div id="assignedEmployeeContainer">
         {% for user in customer.assigned_to.all %}
             {% include 'components/user.html' %}
         {% endfor %}
-        <div id="employeeOverlay" class="hidden z-20 absolute top-14 right-0 p-4 rounded-lg shadow bg-bg w-[80%]">
-            <div class="flex flex-col gap-4">
-                <h3>Select:</h3>
-                <hr>
-                <div id="employeesList" class="space-y-5">
-                    {% for user in users %}
-                        {% if user in customer.assigned_to.all %}
-                            <div class="my-2 p-1 bg-gray-100 hover:cursor-pointer">{% include 'components/user.html' %}</div>
-                        {% else %}
-                            <div class="my-2 p-1 hover:bg-gray-100 hover:cursor-pointer">{% include 'components/user.html' %}</div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
         </div>
     </div>
     {% if project_total %}

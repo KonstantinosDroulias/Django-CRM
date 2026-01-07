@@ -1,16 +1,3 @@
-// GET COOKIE IS AI CODE GENERATED
-function getCookie(name) {
-  const cookies = document.cookie ? document.cookie.split(";") : [];
-  for (let c of cookies) {
-    c = c.trim();
-    if (c.startsWith(name + "=")) {
-      return decodeURIComponent(c.substring(name.length + 1));
-    }
-  }
-  return null;
-}
-// END OF AI GENERATED CODE
-
 const newLeadBtn = document.getElementById("newLeadBtn");
 const newLeadForm = document.getElementById("newLeadForm");
 const newLeadFormOverlay = document.getElementById("newLeadFormOverlay");
@@ -251,7 +238,7 @@ newLeadForm.addEventListener("submit", async(e) => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
+                "X-CSRFToken": csrftoken,
             },
             body: JSON.stringify(payload),
         });

@@ -26,3 +26,18 @@ collapseBtn.addEventListener('click', () => {
 });
 
 // END SIDEBAR LOGIC
+
+// GET COOKIE IS AI CODE GENERATED
+function getCookie(name) {
+  const cookies = document.cookie ? document.cookie.split(";") : [];
+  for (let c of cookies) {
+    c = c.trim();
+    if (c.startsWith(name + "=")) {
+      return decodeURIComponent(c.substring(name.length + 1));
+    }
+  }
+  return null;
+}
+
+const csrftoken = getCookie("csrftoken");
+// END OF AI GENERATED CODE

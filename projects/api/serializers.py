@@ -6,3 +6,18 @@ class ProjectStagesSerializers(serializers.ModelSerializer):
     class Meta:
         model = ProjectStage
         fields = ['id', 'name']
+
+class ProjectsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Project
+        fields = [
+            'id',
+            'name',
+            'description',
+            'price',
+            'priority',
+            'stage',
+            'contributed',
+            'customers'
+        ]
