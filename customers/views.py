@@ -46,6 +46,7 @@ def customer(request, pk):
         'users': users,
         'projects': projects,
         'project_total': project_total,
+        "projects_count": projects.count(),
         'notes': notes,
     }
     return render(request, 'customers/single.html', context)

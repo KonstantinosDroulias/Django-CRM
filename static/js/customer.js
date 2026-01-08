@@ -26,6 +26,56 @@ function closeConfirm() {
     }
 }
 
+const currentCustomerId = JSON.parse(document.getElementById('current-customer-id').textContent);
+
+async function updateTotals() {
+    const projectsCostsContainer = document.getElementById('projectsCosts');
+    const projectsCostsTotalsContainer = document.getElementById('projectsCostsTotals');
+
+    const previousCosts = projectsCostsContainer.innerHTML;
+    const previousTotals = projectsCostsTotalsContainer.innerHTML;
+
+    projectsCostsContainer.innerHTML = `
+        <p class="text-gray-500 animate-pulse">Loading...</p>
+    `
+    projectsCostsTotalsContainer.innerHTML = `
+        <p class="text-text">Total: <span class="animate-pulse text-gray-500">Calculating...</span></p>
+    `
+    try {
+        const response = await fetch('/api/v1/projects/');
+        if (!response.ok) {
+            projectsCostsContainer.innerHTML = previousCosts;
+            projectsCostsTotalsContainer.innerHTML = previousTotals;
+
+            throw new Error('Server error: ' + response.status);
+        }
+        const data = await response.json();
+
+        projectsCostsContainer.innerHTML = '';
+        projectsCostsTotalsContainer.innerHTML = '';
+
+        let costTotals = 0.00
+        data.forEach((project) => {
+            if (project.customers.includes(currentCustomerId)) {
+                costTotals += parseFloat(project.price);
+                let projectCost = `
+                    <p>${project.name} - ${project.price}€</p>
+                `
+                projectsCostsContainer.insertAdjacentHTML('beforeend', projectCost);
+            }
+        })
+
+        projectsCostsTotalsContainer.innerHTML = `
+            <p class="text-text">Total: <strong>${costTotals}€</strong></p>
+        `
+    } catch (e) {
+        console.log('Error: ' + e)
+
+        projectsCostsContainer.innerHTML = previousCosts;
+        projectsCostsTotalsContainer.innerHTML = previousTotals;
+    }
+}
+
 deleteCancel.addEventListener("click", closeConfirm)
 confirmOverlay.addEventListener("click", closeConfirm)
 
@@ -47,6 +97,7 @@ const priorityOptions = priorities.map(([value, label]) => {
 // PROJECT ASSIGNED USERS FUNCTIONALITY START ********
 const currentUserId = JSON.parse(document.getElementById('current-user-id').textContent);
 
+// Turning my previous function to class was AI assisted.
 class UserSelector {
     constructor({ triggerBtnId, relativePlacement, targetWrapperId, initialUserIds = [], modalTitle = "Select Users" }) {
         this.triggerBtn = document.getElementById(triggerBtnId);
@@ -54,7 +105,9 @@ class UserSelector {
         this.targetWrapper = document.getElementById(targetWrapperId);
         this.selectedUsers = new Set(initialUserIds);
         this.allUsers = [];
-        this.modalTitle = modalTitle;
+        for (const selectUser of this.modalTitle = modalTitle) {
+
+        };
         this.isOpen = false;
 
         // START - This was AI assisted
@@ -86,7 +139,7 @@ class UserSelector {
                 <h3 class="font-bold text-xl mb-2 text-text">${this.modalTitle}</h3>
                 <hr>
                 <div id="${this.listContainerId}" class="flex flex-col max-h-60 overflow-y-auto gap-1">
-                    <div class="text-gray-400 text-sm p-2">Loading...</div>
+                    <div class="text-gray-400 text-sm p-2 animate-pulse">Loading...</div>
                 </div>
             </div>
             <div id="${this.overlayId}" class="fixed top-0 left-0 w-full h-full z-40 hidden"></div>
@@ -185,7 +238,7 @@ class UserSelector {
                     class="flex items-center gap-3 p-2 border  cursor-pointer transition-all select-none ${bgClass}"
                 >
                     <div class="w-9 h-9 flex-shrink-0 overflow-hidden rounded-full">
-                        <img src="${user.avatar || '/static/default-avatar.png'}">
+                        <img src="${user.avatar}">
                     </div>
                     <div class="text-sm font-medium text-text">${user.username}</div>
                 </div>
@@ -237,6 +290,7 @@ async function getStages() {
         console.log("Error: " + e);
     }
 }
+
 async function initProjectStages() {
     const wrapper = document.getElementById('new-project-stages-wrapper');
 
@@ -261,19 +315,180 @@ async function initProjectStages() {
 }
 // END PROJECT STAGE
 
+
+// START FETCHING FUNCTIONS
+
+async function fetchUsers() {
+    try {
+        const response = await fetch('/api/v1/users/list/');
+        if (!response.ok) {
+            throw new Error('Server error: ' + response.status);
+        }
+        const data = await response.json();
+        return data;
+    } catch (e) {
+        console.log("Error: " + e);
+    }
+}
+
+// END FETCHING FUNCTIONS
+
+
+// START LOAD PROJECTS
+const projectsLength = JSON.parse(document.getElementById('projects-length').textContent);
+let projectCount = parseInt(projectsLength);
+
+async function loadProjects() {
+    const oldLoad = projectsContainer.innerHTML;
+
+    // Needs work
+    const loadingCard = `
+        <div class="bg-bg shadow p-4 rounded-sm border border-[#f7f7f7] animate-pulse space-y-4 mb-4">
+            <div class="flex justify-between items-center gap-3">
+                <div class="rounded-md bg-gray-300 w-full h-5  animate-pulse"></div>
+                <div class="rounded-md bg-gray-300 w-[32px] h-5 animate-pulse"></div>
+            </div>
+            <div class="flex gap-3 items-start h-12">
+                <div class="rounded-md bg-gray-300 w-full h-full animate-pulse"></div>
+                <div class="rounded-md bg-gray-300 h-8 w-[120px] animate-pulse"></div>
+            </div>
+            <div class="w-[220px] h-8 rounded-md bg-gray-300 animate-pulse"></div>
+        </div>
+    `
+
+    projectsContainer.innerHTML = '';
+
+    const totalLoops = projectCount + 1;
+    for (let i = 0; i < totalLoops; i++) {
+        projectsContainer.insertAdjacentHTML('beforeend', loadingCard);
+    }
+
+    await new Promise(r => setTimeout(r, 1000)); // Test time for animation
+
+    try {
+        const response = await fetch('/api/v1/projects/');
+        if (!response.ok) {
+            projectsContainer.innerHTML = oldLoad;
+            throw new Error('Server error: ' + response.status);
+        }
+        projectsContainer.innerHTML = '';
+
+        const data = await response.json();
+
+        const priorityIcons = {
+            'low': 'Default.svg',
+            'medium': 'Medium.svg',
+            'high': 'High.svg'
+        };
+
+        const contributors = await fetchUsers();
+        const stages = await getStages();
+
+        data.forEach ((project) =>  {
+            if (project.customers.includes(currentCustomerId)) {
+                const iconFile = priorityIcons[project.priority]
+
+                const desc = project.description || "";
+                const shortDesc = desc.length > 80 ? desc.slice(0, 80) + "..." : desc;
+                const descriptionHtml = desc
+                    ? `<div class="relative p-2 border border-gray-400 rounded-sm w-full">
+                           ${shortDesc} 
+                           <p class="text-sm text-text bg-bg absolute top-[-22px] translate-y-1/2 left-[2px]">Description:</p>
+                       </div>`
+                    : `<div></div>`;
+
+                const contributorsContainer = document.createElement('div')
+                contributors.forEach((contributor) => {
+                    if (project.contributed.includes(contributor.id)) {
+                        const div = `
+                            <div class="flex items-center gap-2 mb-1" title="${contributor.username}">
+                                <div class="w-9 h-9 overflow-hidden rounded-full border border-gray-300">
+                                    <img src="${contributor.avatar}" class="w-full h-full object-cover">
+                                </div>
+                                <div>
+                                    <p>${contributor.username}</p>
+                                </div>
+                            </div>
+                        `
+
+                        contributorsContainer.insertAdjacentHTML('beforeend', div);
+                    }
+                })
+                contributorsContainer.classList.add('flex', 'items-center', 'gap-4')
+
+                let stageName = "Unknown";
+                stages.forEach((stage) => {
+                    if (stage.id === project.stage) {
+                        stageName = stage.name
+                    }
+                })
+
+                let card = `
+                <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
+                        <a href="/project/${project.id}">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-3xl font-semibold mb-4 text-text">${project.name}</h2>
+                            <div>
+                                <img title="${project.priority}" src="/static/img/${iconFile}" alt="${project.priority} priority flag">
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="flex gap-3 flex-col w-full">
+                                ${descriptionHtml}
+                                <div>
+                                <p class="text-text text-lg mb-1">Users Contributed:</p>
+                                <div class="flex gap-3 items-center">
+                                <!-- Todo: COMPLETE CONTRIBUTED USERS -->
+                                ${contributorsContainer.outerHTML}
+                                </div>
+                                </div>
+                            </div>
+                            <div>
+                                <p>Price: <strong>${project.price}€</strong></p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center mt-6">
+                            <div>
+                                <p>Project Stage: ${stageName}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Updated At: 
+                                <!-- Date conversion was AI assisted -->
+                                ${ new Date(project.updated_at).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    day: 'numeric', 
+                                    year: 'numeric' 
+                                }) }
+                                </p>
+                            </div>
+                        </div>
+                        </a>
+                    </div>
+                `
+                projectsContainer.insertAdjacentHTML('beforeend', card);
+            }
+        });
+    } catch (e) {
+        console.error("LoadProjects Error:", e);
+        projectsContainer.innerHTML = oldLoad;
+        throw e;
+    }
+}
+// END LOAD PROJECTS
+
 // START PROJECT SAVE
 
 async function saveNewProject(btn, users) {
 
     btn.disabled = true;
     btn.innerText = "Saving...";
+    btn.classList.add('animate-pulse');
     try {
         const name = document.getElementById('projectNameField').value;
         const description = document.getElementById('projectDescriptionField').value;
         const price = document.getElementById('projectPrice').value;
         const priority = document.getElementById('priority').value;
         const stage = document.getElementById('projectStages').value;
-        const currentCustomerId = JSON.parse(document.getElementById('current-customer-id').textContent);
 
         const customers = [currentCustomerId];
 
@@ -298,6 +513,10 @@ async function saveNewProject(btn, users) {
 
         if (response.ok) {
             //On going
+            await loadProjects();
+            projectCount += 1;
+            await updateTotals();
+            toggleAddProject();
         } else {
             const errorData = await response.json();
             console.error("Save failed:", errorData);
@@ -305,6 +524,7 @@ async function saveNewProject(btn, users) {
 
             btn.disabled = false;
             btn.innerText = "Save";
+            btn.classList.remove('animate-pulse');
         }
 
     } catch (error) {
@@ -312,13 +532,14 @@ async function saveNewProject(btn, users) {
         alert("Something went wrong. Check console.");
         btn.disabled = false;
         btn.innerText = "Save";
+        btn.classList.remove('animate-pulse');
     }
 }
 
 // END PROJECT SAVE
 
 const projectBlock = `
-    <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
+    <div id="newPorjectFormCard" class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
         <form>
         <div class="flex items-center justify-between">
             <h2 class="text-3xl font-semibold mb-4 text-text"><input type="text" id="projectNameField" name="projectNameField" placeholder="Project Title"></h2>
@@ -362,12 +583,34 @@ const projectBlock = `
         </form>
     </div>
 `
+
 let activeNewProjectCard = false
+
+function toggleAddProject() {
+    activeNewProjectCard = !activeNewProjectCard;
+
+    if (!activeNewProjectCard) {
+        addProjectBtn.classList.remove('hidden');
+    }
+}
+
+function cancelNewProject() {
+    const formCard = document.getElementById('newPorjectFormCard');
+
+    if (formCard) {
+        formCard.remove();
+    }
+    toggleAddProject();
+}
+
 function addProject() {
     if (!activeNewProjectCard) {
         projectsContainer.insertAdjacentHTML('beforeend', projectBlock)
 
         const saveBtn = document.getElementById('saveNewProject');
+
+        const cancelNewProjectBtn = document.getElementById('cancelNewProject');
+        cancelNewProjectBtn.addEventListener('click', cancelNewProject);
 
         const newProjectAssigner = new UserSelector({
             triggerBtnId: 'assignProjectUsersBtn',

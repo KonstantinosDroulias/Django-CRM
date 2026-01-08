@@ -137,6 +137,7 @@
                 {{ request.user.id|json_script:"current-user-id" }}
                 <h2 class="text-text text-2xl mb-4">Projects</h2>
                 <div id="projectsContainer">
+                {{ projects_count|json_script:"projects-length" }}
                 {% for project in projects %}
                 <div class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
                     <a href="/project/{{ project.id }}">
@@ -182,7 +183,7 @@
                 </div>
                 {% endfor %}
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 relative">
                     <hr class="w-full border-dashed border-gray-400">
                     <button type="button" id="addProjectBtn" title="Add Project" class="hover:cursor-pointer py-[2px] px-[9px] text-base rounded-full texxt-text bg-brand-400">+</button>
                 </div>
@@ -230,11 +231,15 @@
         <h2 class="mb-2 text-lg font-semibold">Customer Totals</h2>
         <hr>
         </div>
+        <div id="projectsCosts">
         {% for project in projects %}
         <p>{{ project.name|truncatechars:20 }} - {{ project.price }}€</p>
         {% endfor %}
+        </div>
         <hr class="border border-dashed border-gray-300">
+        <div id="projectsCostsTotals">
         <p class="text-text">Total: <strong>{{ project_total }}€</strong></p>
+        </div>
     </div>
     {% endif %}
     </div>

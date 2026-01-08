@@ -19,5 +19,7 @@ class ProjectsSerializer(serializers.ModelSerializer):
             'priority',
             'stage',
             'contributed',
-            'customers'
+            'customers',
+            'company',
+            'updated_at'
         ]
