@@ -333,7 +333,6 @@ async function fetchUsers() {
 
 // END FETCHING FUNCTIONS
 
-
 // START LOAD PROJECTS
 const projectsLength = JSON.parse(document.getElementById('projects-length').textContent);
 let projectCount = parseInt(projectsLength);
@@ -477,51 +476,60 @@ async function loadProjects() {
 // END LOAD PROJECTS
 
 // START PROJECT SAVE
-
+const saveNewProjectValidator = new FormValidator();
 async function saveNewProject(btn, users) {
 
     btn.disabled = true;
     btn.innerText = "Saving...";
     btn.classList.add('animate-pulse');
     try {
-        const name = document.getElementById('projectNameField').value;
-        const description = document.getElementById('projectDescriptionField').value;
-        const price = document.getElementById('projectPrice').value;
-        const priority = document.getElementById('priority').value;
-        const stage = document.getElementById('projectStages').value;
+        saveNewProjectValidator.reset();
+
+        const name = document.getElementById('projectNameField')
+        const description = document.getElementById('projectDescriptionField')
+        const price = document.getElementById('projectPrice')
+        const priority = document.getElementById('priority')
+        const stage = document.getElementById('projectStages')
 
         const customers = [currentCustomerId];
 
-        const payload = {
-            name: name,
-            description: description,
-            price: price ? parseFloat(price) : 0,
-            priority: priority,
-            stage: stage,
-            contributed: users,
-            customers: customers
-        };
+        saveNewProjectValidator.checkText(name, 'Invalid Project Title');
 
-        const response = await fetch('/api/v1/projects/', {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrftoken,
-            },
-            body: JSON.stringify(payload),
-        })
+        if (saveNewProjectValidator.passes()) {
+            const payload = {
+                name: name.value,
+                description: description.value,
+                price: price.value ? parseFloat(price.value) : 0,
+                priority: priority.value,
+                stage: stage.value,
+                contributed: users,
+                customers: customers
+            };
 
-        if (response.ok) {
-            //On going
-            await loadProjects();
-            projectCount += 1;
-            await updateTotals();
-            toggleAddProject();
+            const response = await fetch('/api/v1/projects/', {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken,
+                },
+                body: JSON.stringify(payload),
+            })
+
+            if (response.ok) {
+                //On going
+                await loadProjects();
+                projectCount += 1;
+                await updateTotals();
+                toggleAddProject();
+            } else {
+                const errorData = await response.json();
+                console.error("Save failed:", errorData);
+
+                btn.disabled = false;
+                btn.innerText = "Save";
+                btn.classList.remove('animate-pulse');
+            }
         } else {
-            const errorData = await response.json();
-            console.error("Save failed:", errorData);
-            alert("Error saving project: " + JSON.stringify(errorData));
-
             btn.disabled = false;
             btn.innerText = "Save";
             btn.classList.remove('animate-pulse');
@@ -594,6 +602,7 @@ function toggleAddProject() {
     }
 }
 
+
 function cancelNewProject() {
     const formCard = document.getElementById('newPorjectFormCard');
 
@@ -636,3 +645,78 @@ const assignUser = new UserSelector({
     initialUserIds: [currentUserId],
     modalTitle: 'Assign Employees'
 });
+
+// START UPDATE CUSTOMER
+
+const form = document.getElementById('customerEditForm');
+const validator = new FormValidator();
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    validator.reset();
+
+    const firstNameInput = form.elements['first_name'];
+    const lastNameInput  = form.elements['last_name'];
+
+    const addressInput = form.elements['address'];
+    const cityInput = form.elements['city'];
+    const stateInput  = form.elements['state'];
+    const countryInput = form.elements['country'];
+
+    const companySelect = form.elements['company'];
+    const emailInput  = form.elements['email'];
+    const phoneInput  = form.elements['phone_number'];
+
+    const sourceSelect = form.elements['source'];
+    const leadStatusSelect = form.elements['lead_status'];
+
+    validator.checkText(firstNameInput, 'First Name is required');
+    validator.checkText(lastNameInput, 'Last Name is required');
+
+    validator.checkEmail(emailInput, 'Invalid Email');
+    validator.checkPhone(phoneInput, 'Invalid Phone Number');
+
+    validator.checkText(sourceSelect, 'Please select a Source');
+    validator.checkText(leadStatusSelect, 'Please select a Status');
+
+    if (activeNewProjectCard) {
+        const formCard = document.getElementById('newPorjectFormCard');
+
+        formCard.classList.remove('border-[#f7f7f7]');
+
+        formCard.classList.add('border-red-500', 'border-2');
+    } else {
+        if (validator.passes()) {
+            const formData = new FormData(form);
+
+            await updateCustomer(formData);
+        }
+    }
+
+})
+
+async function updateCustomer(formData) {
+    const payload = Object.fromEntries(formData);
+
+    try {
+        const response = await fetch(`/api/v1/customers/${currentCustomerId}/`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Success:", data);
+            window.location.reload();
+        } else {
+            console.error("Error:", await response.json());
+        }
+
+    } catch (e) {
+        console.error(e);
+    }
+}

@@ -57,12 +57,9 @@ class Customer(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 def customer_file_path(instance, filename):
-    return f"customers/{instance.customer.name}/{filename}"
+    return f"customers/{instance.customer.id}_{instance.customer.last_name}/{filename}"
 
 class CustomerFiles(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Customer, related_name='uploaded_files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=customer_file_path)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.customer.first_name}: {self.file.name}"

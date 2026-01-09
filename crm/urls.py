@@ -33,6 +33,7 @@ urlpatterns = [
     path('', include('dashboard.urls')),
     path('', include('todo.urls')),
     path('', include('company.urls')),
+    path('api/v1/companies/', include('company.api.urls')),
     path('', include('customers.urls')),
     path('api/v1/customers/', include('customers.api.urls')),
     path('api/v1/users/', include('users.api.urls')),

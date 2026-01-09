@@ -38,11 +38,15 @@ def customer(request, pk):
     projects = Project.objects.filter(customers=customer)
     project_total = projects.aggregate(Sum('price'))['price__sum']
     users = User.objects.all()
+    company = Company.objects.filter(customer=customer)
+    companies = Company.objects.all()
     priorities = Project.Priority.choices
     context = {
         'lead_status': lead_status,
         'sources': sources,
         'customer': customer,
+        'companies': companies,
+        'company': company,
         'users': users,
         'projects': projects,
         'project_total': project_total,

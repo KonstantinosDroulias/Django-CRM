@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.groups.first().name
         return "Employee"
 
-
+# Ai generated - Then I leaned to do my own
 class CustomerSerializer(serializers.ModelSerializer):
 
     company_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -58,3 +58,15 @@ class CustomerSerializer(serializers.ModelSerializer):
 
         return customer
 
+
+class CustomerUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'phone_number',
+            'address', 'city', 'state', 'country', 'zip_code',
+            'source', 'lead_status', 'company',
+            'last_contact', 'next_contact', 'value'
+        ]
+        read_only_fields = ['created_at', 'updated_at', 'assigned_to']

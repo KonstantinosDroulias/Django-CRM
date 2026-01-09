@@ -11,7 +11,7 @@
     </div>
     <div class="flex justify-end items-center gap-4">
     <button title="Delete Customer" class="px-2 py-2 bg-error shrink-0 flex items-center gap-3 hover:cursor-pointer rounded-sm shadow-sm" id="deleteTrigger"><img src="{% static 'img/trash.svg' %}" alt="Trash Icon"></button>
-    <button title="Save Changes" class="px-2 py-2 bg-bg shrink-0 flex items-center gap-3 hover:cursor-pointer rounded-sm shadow-sm" id="updateCustomer"><img src="{% static 'img/save.svg' %}" alt="Save Icon"></button>
+    <button form="customerEditForm" type="submit" title="Save Changes" class="px-2 py-2 bg-bg shrink-0 flex items-center gap-3 hover:cursor-pointer rounded-sm shadow-sm" id="updateCustomer"><img src="{% static 'img/save.svg' %}" alt="Save Icon"></button>
     </div>
 </div>
 
@@ -32,8 +32,7 @@
 
 <section class="grid grid-cols-1 lg:grid-cols-[3fr_1fr] gap-5">
     <div class="bg-bg p-5 rounded-lg shadow">
-            <form class="space-y-4" action="" method="post">
-            {% csrf_token %}
+            <form id="customerEditForm" class="space-y-4" action="" method="post">
 
             <h1 class="text-text text-4xl font-bold mb-4">
                 <input class="w-min" type="text" placeholder="First Name" name="first_name" value="{{ customer.first_name }}">
@@ -73,16 +72,24 @@
 
             <section class="grid grid-cols-2 items-center gap-6 mb-4 p-2">
                 <div class="flex flex-col">
-                    <label class="text-sm font-medium text-text">Company Name:</label>
-                    <input type="text" placeholder="Company Name" name="company_name"
-                           value="{{ customer.company_name }}"
-                           class="border border-gray-300 rounded px-2 py-1">
+                    <label class="text-sm font-medium text-text">Company:</label>
+                    <select name="company" class="border border-gray-300 rounded px-2 py-1">
+                        <option value="">Select a Company</option>
+
+                        {% for c in companies %}
+                            <option value="{{ c.id }}"
+                                {% if customer.company_id == c.id %}selected{% endif %}>
+                                {{ c.company_name }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
                 </div>
 
                 <div class="flex flex-col">
-                    <label class="text-sm font-medium text-text">VAT ID:</label>
-                    <input type="text" placeholder="VAT ID" name="vat_id"
-                           value="{{ customer.vat_id }}"
+                    <label class="text-sm font-medium text-text">Phone:</label>
+                    <input type="text" placeholder="Phone" name="phone_number"
+                           value="{{ customer.phone_number }}"
                            class="border border-gray-300 rounded px-2 py-1">
                 </div>
 
@@ -93,12 +100,7 @@
                            class="border border-gray-300 rounded px-2 py-1">
                 </div>
 
-                <div class="flex flex-col">
-                    <label class="text-sm font-medium text-text">Phone:</label>
-                    <input type="text" placeholder="Phone" name="phone"
-                           value="{{ customer.phone_number }}"
-                           class="border border-gray-300 rounded px-2 py-1">
-                </div>
+
             </section>
 
 
