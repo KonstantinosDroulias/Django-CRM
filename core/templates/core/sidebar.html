@@ -3,9 +3,15 @@
 
     <nav class="flex flex-col justify-between h-full">
         <div>
-            {% include "components/nav-link.html" with url="/" img_url="/static/img/dashboard.svg" alt_text="Dashboard icon" text="Dashboard" %}
-            {% include "components/nav-link.html" with url="/customers" img_url="/static/img/List.svg" alt_text="Lead List icon" text="Lead List" %}
-            {% include "components/nav-link.html" with url="/projects" img_url="/static/img/Project.svg" alt_text="Dashboard icon" text="Projects" %}
+
+            {% if perms.auth.add_user %}
+                {% include "components/nav-link.html" with url="/" img_url="/static/img/People.svg" alt_text="Admin Dashboard icon" text="Manage Users" %}
+            {% else %}
+                {% include "components/nav-link.html" with url="/" img_url="/static/img/dashboard.svg" alt_text="Dashboard icon" text="Dashboard" %}
+                {% include "components/nav-link.html" with url="/customers" img_url="/static/img/List.svg" alt_text="Lead List icon" text="Lead List" %}
+                {% include "components/nav-link.html" with url="/projects" img_url="/static/img/Project.svg" alt_text="Dashboard icon" text="Projects" %}
+
+            {% endif %}
         </div>
 
         <div class="flex flex-col gap-3">

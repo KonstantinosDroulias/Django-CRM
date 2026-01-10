@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+
+    <section class="flex items-center gap-4">
+        <a id="newUserBtn" class="px-3 py-2 bg-brand-400 hover:cursor-pointer flex items-center gap-2" href="/user/add">Add New User</a>
+    </section>
+
+    <section class="p-5 rounded-lg bg-bg shadow space-y-4">
+    <div class="overflow-x-scroll w-full pl-4">
+    <table class="w-full  text-text text-lg border-separate border-spacing-y-2">
+        <thead class="text-left bg-brand-100 sticky top-0">
+            <tr>
+                <th class="p-3 font-normal text-nowrap">User ID</th>
+                <th class="p-3 font-normal text-nowrap">Username</th>
+                <th class="p-3 font-normal text-nowrap">Email</th>
+                <th class="p-3 font-normal text-nowrap">First Name</th>
+                <th class="p-3 font-normal text-nowrap">Last Name</th>
+                <th class="p-3 font-normal text-nowrap">Role</th>
+                <th class="p-3 font-normal text-nowrap">Status</th>
+                <th class="p-3 font-normal text-nowrap">Created At</th>
+                <th class="p-3 font-normal text-nowrap">Last Login</th>
+            </tr>
+        </thead>
+        <tbody class="bg-bg">
+        {% for user in users %}
+            <tr class="group border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                <td class="p-3 text-nowrap"><p class="relative">{{ user.id }}<a class="hidden group-hover:block absolute top-0 left-[-30px] z-50 p-1 border-1 bg-bg shadow-sm" href="/user/{{ user.id }}"><img width="20px" height="20px" title="Edit User" src="/static/img/PersonIcon.svg" alt="Edit User Icon"></a></p></td>
+                <td class="p-3 text-nowrap">{{ user.username }}</td>
+                <td class="p-3 text-nowrap">{{ user.email }}</td>
+                <td class="p-3 text-nowrap">{{ user.first_name }}</td>
+                <td class="p-3 text-nowrap">{{ user.last_name }}</td>
+                <td class="p-3 text-nowrap">{{ user.group.name }}</td>
+                {% if user.is_active %}
+                    <td class="p-3 text-nowrap">Active</td>
+                {% else %}
+                    <td class="p-3 text-nowrap">Disabled</td>
+                {% endif %}
+                <td class="p-3 text-nowrap">{{ user.date_joined }}</td>
+                <td class="p-3 text-nowrap">{{ user.last_login }}</td>
+            </tr>
+            {% endfor %}
+        <tbody>
+    </table>
+    </div>
+    </section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+{% endblock %}

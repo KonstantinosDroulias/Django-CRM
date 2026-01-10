@@ -5,18 +5,20 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import Sum
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
 from company.models import Company
-from customers.models import LeadStatus, Source, Customer, Note
+from customers.models import LeadStatus, Source, Customer, CustomerFiles
 from projects.models import Project
 
 
 # Create your views here.
-
+@login_required
 def index(request):
+    if request.user.has_perm('auth.add_user'):
+        return render(request, '403.html', status=403)
     lead_status = list(LeadStatus.objects.values('id', 'name'))
     sources = Source.objects.all()
     customers = Customer.objects.all()
@@ -30,17 +32,20 @@ def index(request):
     }
     return render(request, 'customers/index.html', context)
 
+@login_required
 def customer(request, pk):
+    if request.user.has_perm('auth.add_user'):
+        return HttpResponseForbidden('You cannot view this page.')
     customer = get_object_or_404(Customer, id=pk)
     lead_status = LeadStatus.objects.all()
     sources = Source.objects.all()
-    notes = Note.objects.filter(customer=customer).order_by('-created_at')
     projects = Project.objects.filter(customers=customer)
     project_total = projects.aggregate(Sum('price'))['price__sum']
     users = User.objects.all()
     company = Company.objects.filter(customer=customer)
     companies = Company.objects.all()
     priorities = Project.Priority.choices
+    files = CustomerFiles.objects.filter(customer=customer).order_by('-created_at')
     context = {
         'lead_status': lead_status,
         'sources': sources,
@@ -51,13 +56,15 @@ def customer(request, pk):
         'projects': projects,
         'project_total': project_total,
         "projects_count": projects.count(),
-        'notes': notes,
+        'files': files,
     }
     return render(request, 'customers/single.html', context)
 
 @require_POST
 @login_required
 def delete_customer(request, pk):
+    if request.user.has_perm('auth.add_user'):
+        return render(request, '403.html', status=403)
     customer = Customer.objects.get(id=pk)
     customer.delete()
     return redirect('/customers')

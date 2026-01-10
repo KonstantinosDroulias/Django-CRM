@@ -59,14 +59,32 @@ class CustomerSerializer(serializers.ModelSerializer):
         return customer
 
 
+# Updated to allow files is Ai generated.
 class CustomerUpdateSerializer(serializers.ModelSerializer):
+    files = serializers.ListField(
+        child=serializers.FileField(max_length=100000, allow_empty_file=False, use_url=False),
+        write_only=True,
+        required=False
+    )
+
     class Meta:
         model = Customer
-
         fields = [
             'id', 'first_name', 'last_name', 'email', 'phone_number',
             'address', 'city', 'state', 'country', 'zip_code',
             'source', 'lead_status', 'company',
-            'last_contact', 'next_contact', 'value'
+            'last_contact', 'next_contact', 'value',
+            'files'
         ]
         read_only_fields = ['created_at', 'updated_at', 'assigned_to']
+
+    def update(self, instance, validated_data):
+        files_data = validated_data.pop('files', None)
+
+        customer = super().update(instance, validated_data)
+
+        if files_data:
+            for file_item in files_data:
+                CustomerFiles.objects.create(customer=customer, file=file_item)
+
+        return customer

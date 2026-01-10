@@ -81,17 +81,7 @@
     </div>
     {% endif %}
 
-    <div class="flex flex-col rounded-lg bg-bg shadow p-3">
-        <label class="text-sm font-medium text-text">Notes:</label>
-        <div class="flex w-full">
-        <textarea name="notes" id="notes" rows="6" class="border border-gray-300 rounded px-2 py-1 flex-1 shrink-0"></textarea>
-        <div class="flex flex-col overflow-y-scroll max-h-[155px] w-[200px] px-1">
-            {% for note in notes %}
-                <div class="p-2 hover:bg-gray-200">{{ note.title|truncatechars:20 }} - <span class="text-gray-400 text-sm">{{ note.updated_at }}</span></div>
-            {% endfor %}
-        </div>
-        </div>
-    </div>
+
 
     <!-- END OF LEFT COL -->
     </div>

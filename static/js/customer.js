@@ -696,16 +696,13 @@ form.addEventListener('submit', async (e) => {
 })
 
 async function updateCustomer(formData) {
-    const payload = Object.fromEntries(formData);
-
     try {
         const response = await fetch(`/api/v1/customers/${currentCustomerId}/`, {
             method: "PATCH",
             headers: {
-                "Content-Type": "application/json",
                 "X-CSRFToken": csrftoken,
             },
-            body: JSON.stringify(payload),
+            body: formData,
         });
 
         if (response.ok) {

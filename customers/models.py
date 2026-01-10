@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-
+import os
 from company.models import Company
 
 
@@ -19,17 +19,6 @@ class LeadStatus(models.Model):
 
     def __str__(self):
         return self.name
-
-class Note(models.Model):
-    customer = models.ForeignKey('Customer', related_name='notes', on_delete=models.CASCADE)
-    title = models.CharField(max_length=100, null=True, blank=True)
-    content = models.TextField(null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
-
-    def __str__(self):
-        return self.title
 
 class Customer(models.Model):
     first_name = models.CharField(max_length=100)
@@ -63,3 +52,10 @@ class CustomerFiles(models.Model):
     customer = models.ForeignKey(Customer, related_name='uploaded_files', on_delete=models.CASCADE)
     file = models.FileField(upload_to=customer_file_path)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    def __str__(self):
+        return f"{self.customer.first_name}: {self.filename}"
