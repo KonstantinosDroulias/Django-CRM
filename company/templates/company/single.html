@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Company {{ company.company_name }}{% endblock %}
+
+{% block body %}
+
+    <form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="delete">
+
+    <input type="submit" value="DELETE" class="leading-none px-2 py-1 bg-error shadow-sm text-bg border-none rounded-xs hover:cursor-pointer text-sm">
+    </form>
+
+<section class="p-5 bg-bg rounded-lg shadow ">
+    <form id="customerEditForm" class="space-y-5" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="flex gap-4 items-center">
+            {% if company.logo %}
+                <img class="max-w-[120px]" src="{{ company.logo.url }}" alt="Company Logo">
+            {% else %}
+                <img src="/static/img/logo-placeholder.png" alt="Default Logo">
+            {% endif %}
+            <input type="file" name="logo">
+        </div>
+        <div class="flex item-center justify-between">
+            <div class="flex gap-5">
+                <div class="flex flex-col">
+                    <label for="company-name" class="text-sm font-medium text-text">Company Name:</label>
+                    <input class="border border-gray-300 rounded px-2 py-1"
+                           type="text"
+                           placeholder="Company Name"
+                           name="company-name"
+                           id="company-name"
+                           value="{{ company.company_name }}">
+                </div>
+                <div class="flex flex-col">
+                    <label for="vat-id" class="text-sm font-medium text-text">Vat Id:</label>
+                    <input type="text"
+                           placeholder="Vat Id"
+                           id="vat-id"
+                           name="vat-id"
+                           value="{{ company.vat_id }}"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+            </div>
+            <div class="flex items-end">
+                <input type="submit" class="text-sm leading-none bg-brand-400 px-3 py-2 hover:cursor-pointer my-auto" value="Update">
+            </div>
+        </div>
+    </form>
+</section>
+
+<section class="grid grid-cols-2 gap-5 space-y-4">
+    <div class="p-4 rounded-lg shadow bg-bg">
+        <h2>Customers:</h2>
+        <hr>
+        <ul class="space-y-2 py-2">
+        {% for customer in customers %}
+            <li><a class="hover:text-brand-500 transition-all" href="/customer/{{ customer.id }}">{{ customer.first_name }} {{ customer.last_name }}</a></li>
+        {% empty %}
+            <li class="text-gray-500 text-sm">No customers found.</li>
+        {% endfor %}
+        </ul>
+    </div>
+    <div class="p-4 rounded-lg shadow bg-bg space-y-4">
+        <div class="flex items-center justify-between">
+            <h2>Projects:</h2>
+            <div>
+               Total Sales: {{ total_value }}€
+            </div>
+        </div>
+        <hr>
+        <ul class="space-y-2 py-2">
+        {% for project in projects %}
+            <li class="p-3 shadow-sm bg-gray-50 rounded-md hover:bg-brand-50 transition-all"><a href="/customer/{{ project.id }}">
+                <div class="flex justify-between">
+                    <div class="flex flex-col gap-2">
+                    <p>{{ project.name }}</p>
+                    <p>
+                        {{ project.description|truncatechars:20 }}
+                    </p>
+                    </div>
+                    {{ project.price }}€
+                </div>
+            </a></li>
+        {% empty %}
+             <li class="text-gray-500 text-sm">No projects found.</li>
+        {% endfor %}
+        </ul>
+    </div>
+</section>
+
+{% endblock %}
+{% block extra_scripts %}
+<script src="{% static 'js/company.js' %}"></script>
+{% endblock %}

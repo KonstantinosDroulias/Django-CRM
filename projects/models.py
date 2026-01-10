@@ -20,7 +20,6 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     customers = models.ManyToManyField(Customer)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, null=True, blank=True)
 
     #The priority was Ai generated in attempt to learn how to add enum database column
     class Priority(models.TextChoices):

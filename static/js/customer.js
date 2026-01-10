@@ -1,22 +1,22 @@
 const list = document.getElementsByClassName("list");
 
+// --- DELETE MODULE ---
 const deleteTrigger = document.getElementById("deleteTrigger");
 const confirmModule = document.getElementById("confirmModule");
 const deleteCancel = document.getElementById("deleteCancel");
 const deleteBtn = document.getElementById("deleteBtn");
 const confirmOverlay = document.getElementById("confirmOverlay");
 
-const projectsContainer = document.getElementById('projectsContainer')
-const addProjectBtn = document.getElementById('addProjectBtn');
-
 let confirmFlag = false;
-deleteTrigger.addEventListener("click", function (event) {
-    if (!confirmFlag) {
-        confirmModule.classList.remove("hidden");
-        confirmOverlay.classList.remove("hidden");
-        confirmFlag = true;
-    }
-})
+if (deleteTrigger) {
+    deleteTrigger.addEventListener("click", function (event) {
+        if (!confirmFlag) {
+            confirmModule.classList.remove("hidden");
+            confirmOverlay.classList.remove("hidden");
+            confirmFlag = true;
+        }
+    })
+}
 
 function closeConfirm() {
     if (confirmFlag) {
@@ -26,27 +26,34 @@ function closeConfirm() {
     }
 }
 
+if (deleteCancel) deleteCancel.addEventListener("click", closeConfirm);
+if (confirmOverlay) confirmOverlay.addEventListener("click", closeConfirm);
+
+// --- GLOBAL VARIABLES ---
 const currentCustomerId = JSON.parse(document.getElementById('current-customer-id').textContent);
+const currentUserId = document.getElementById('current-user-id') ? JSON.parse(document.getElementById('current-user-id').textContent) : null;
+
+// --- PROJECT LIST & TOTALS ---
+const projectsContainer = document.getElementById('projectsContainer')
+const addProjectBtn = document.getElementById('addProjectBtn');
 
 async function updateTotals() {
     const projectsCostsContainer = document.getElementById('projectsCosts');
     const projectsCostsTotalsContainer = document.getElementById('projectsCostsTotals');
 
+    if (!projectsCostsContainer) return;
+
     const previousCosts = projectsCostsContainer.innerHTML;
     const previousTotals = projectsCostsTotalsContainer.innerHTML;
 
-    projectsCostsContainer.innerHTML = `
-        <p class="text-gray-500 animate-pulse">Loading...</p>
-    `
-    projectsCostsTotalsContainer.innerHTML = `
-        <p class="text-text">Total: <span class="animate-pulse text-gray-500">Calculating...</span></p>
-    `
+    projectsCostsContainer.innerHTML = `<p class="text-gray-500 animate-pulse">Loading...</p>`
+    projectsCostsTotalsContainer.innerHTML = `<p class="text-text">Total: <span class="animate-pulse text-gray-500">Calculating...</span></p>`
+
     try {
         const response = await fetch('/api/v1/projects/');
         if (!response.ok) {
             projectsCostsContainer.innerHTML = previousCosts;
             projectsCostsTotalsContainer.innerHTML = previousTotals;
-
             throw new Error('Server error: ' + response.status);
         }
         const data = await response.json();
@@ -58,28 +65,22 @@ async function updateTotals() {
         data.forEach((project) => {
             if (project.customers.includes(currentCustomerId)) {
                 costTotals += parseFloat(project.price);
-                let projectCost = `
-                    <p>${project.name} - ${project.price}€</p>
-                `
+                let projectCost = `<p>${project.name} - ${project.price}€</p>`
                 projectsCostsContainer.insertAdjacentHTML('beforeend', projectCost);
             }
         })
 
-        projectsCostsTotalsContainer.innerHTML = `
-            <p class="text-text">Total: <strong>${costTotals}€</strong></p>
-        `
+        projectsCostsTotalsContainer.innerHTML = `<p class="text-text">Total: <strong>${costTotals}€</strong></p>`
     } catch (e) {
         console.log('Error: ' + e)
-
         projectsCostsContainer.innerHTML = previousCosts;
         projectsCostsTotalsContainer.innerHTML = previousTotals;
     }
 }
 
-deleteCancel.addEventListener("click", closeConfirm)
-confirmOverlay.addEventListener("click", closeConfirm)
-
-addProjectBtn.addEventListener('click', addProject);
+if (addProjectBtn) {
+    addProjectBtn.addEventListener('click', addProject);
+}
 
 const priorities = [
     ['low', 'Low'],
@@ -94,10 +95,7 @@ const priorityOptions = priorities.map(([value, label]) => {
     return `<option value="${value}" ${isSelected}>${label}</option>`;
 }).join('');
 
-// PROJECT ASSIGNED USERS FUNCTIONALITY START ********
-const currentUserId = JSON.parse(document.getElementById('current-user-id').textContent);
-
-// Turning my previous function to class was AI assisted.
+// --- USER SELECTOR CLASS ---
 class UserSelector {
     constructor({ triggerBtnId, relativePlacement, targetWrapperId, initialUserIds = [], modalTitle = "Select Users" }) {
         this.triggerBtn = document.getElementById(triggerBtnId);
@@ -105,22 +103,19 @@ class UserSelector {
         this.targetWrapper = document.getElementById(targetWrapperId);
         this.selectedUsers = new Set(initialUserIds);
         this.allUsers = [];
-        for (const selectUser of this.modalTitle = modalTitle) {
-
-        };
+        this.modalTitle = modalTitle;
         this.isOpen = false;
 
-        // START - This was AI assisted
         this.instanceId = Math.random().toString(36).substr(2, 9);
         this.modalId = `modal-${this.instanceId}`;
         this.overlayId = `overlay-${this.instanceId}`;
         this.listContainerId = `list-${this.instanceId}`;
-        // END - This was AI assisted
 
         this.init();
     }
 
     async init() {
+        if (!this.relativeDiv) return;
         this.createModalDOM();
 
         this.modalDiv = document.getElementById(this.modalId);
@@ -148,20 +143,14 @@ class UserSelector {
     }
 
     attachEventListeners() {
-        // Toggle Open/Close on Trigger Button
         if(this.triggerBtn) {
             this.triggerBtn.addEventListener('click', (e) => {
-                e.preventDefault(); // Prevent form submission if inside a form
+                e.preventDefault();
                 this.toggleModal();
             });
         }
-
-        // Close on Overlay Click
         this.overlay.addEventListener('click', () => this.closeModal());
-
-        // Event Delegation: Handle User Clicks inside the list
         this.listContainer.addEventListener('click', (e) => {
-            // Find the closest parent div that has a data-user-id attribute
             const userRow = e.target.closest('[data-user-id]');
             if (userRow) {
                 const userId = parseInt(userRow.dataset.userId);
@@ -170,11 +159,8 @@ class UserSelector {
         });
     }
 
-    // --- LOGIC ---
-
     async fetchUsers() {
-        if (this.allUsers.length > 0) return; // Don't fetch if we already have them
-
+        if (this.allUsers.length > 0) return;
         try {
             const response = await fetch('/api/v1/users/list/');
             if (response.ok) {
@@ -199,8 +185,6 @@ class UserSelector {
         this.isOpen = true;
         this.modalDiv.classList.remove('hidden');
         this.overlay.classList.remove('hidden');
-
-        // Ensure we have data, then render the list
         await this.fetchUsers();
         this.renderList();
     }
@@ -209,8 +193,6 @@ class UserSelector {
         this.isOpen = false;
         this.modalDiv.classList.add('hidden');
         this.overlay.classList.add('hidden');
-
-        // Update the summary view (the avatars on the main page)
         this.renderSummary();
     }
 
@@ -220,23 +202,15 @@ class UserSelector {
         } else {
             this.selectedUsers.add(id);
         }
-        // Re-render the list immediately to show blue highlight
         this.renderList();
     }
-
-    // --- RENDERING ---
 
     renderList() {
         this.listContainer.innerHTML = this.allUsers.map(user => {
             const isSelected = this.selectedUsers.has(user.id);
             const bgClass = isSelected ? 'bg-brand-50 border-brand-400' : 'bg-white border-transparent hover:bg-gray-50';
-
-            // Note: We use data-user-id instead of onclick="func()"
             return `
-                <div 
-                    data-user-id="${user.id}" 
-                    class="flex items-center gap-3 p-2 border  cursor-pointer transition-all select-none ${bgClass}"
-                >
+                <div data-user-id="${user.id}" class="flex items-center gap-3 p-2 border cursor-pointer transition-all select-none ${bgClass}">
                     <div class="w-9 h-9 flex-shrink-0 overflow-hidden rounded-full">
                         <img src="${user.avatar}">
                     </div>
@@ -247,15 +221,12 @@ class UserSelector {
     }
 
     renderSummary() {
-        // Filter the cached users to find the selected ones
         const selectedObjects = this.allUsers.filter(u => this.selectedUsers.has(u.id));
-
         if (this.targetWrapper) {
             if (selectedObjects.length === 0) {
                 this.targetWrapper.innerHTML = '<span class="text-gray-400 text-sm">No users assigned</span>';
                 return;
             }
-
             this.targetWrapper.innerHTML = selectedObjects.map(user => `
                 <div class="flex items-center gap-2 mb-1" title="${user.username}">
                     <div class="w-9 h-9 overflow-hidden rounded-full border border-gray-300">
@@ -269,78 +240,57 @@ class UserSelector {
         }
     }
 
-    // Helper to get data out when you submit the form
     getSelectedIds() {
         return Array.from(this.selectedUsers);
     }
 }
 
-// PROJECT ASSIGNED USERS FUNCTIONALITY END ********
-
-// START PROJECT STAGE
+// --- PROJECT STAGE FETCHING ---
 async function getStages() {
     try {
         const response = await fetch('/api/v1/projects/stages/');
-        if (!response.ok) {
-        throw new Error('Server error: ' + response.status);
-        }
+        if (!response.ok) throw new Error('Server error: ' + response.status);
         const data = await response.json();
         return data;
     } catch (e) {
         console.log("Error: " + e);
+        return [];
     }
 }
 
 async function initProjectStages() {
     const wrapper = document.getElementById('new-project-stages-wrapper');
-
-    if (!wrapper) {
-        console.error("Could not find new-project-stages-wrapper");
-        return;
-    }
+    if (!wrapper) return;
 
     wrapper.innerHTML = `<select class="border rounded p-1" disabled><option>Loading...</option></select>`;
-
     const stages = await getStages();
 
     const optionsHTML = stages.map(stage => {
         return `<option value="${stage.id}">${stage.name}</option>`;
     }).join('');
 
-    wrapper.innerHTML = `
-        <select id="projectStages" name="stage_id" class="border rounded p-1">
-            ${optionsHTML}
-        </select>
-    `;
+    wrapper.innerHTML = `<select id="projectStages" name="stage_id" class="border rounded p-1">${optionsHTML}</select>`;
 }
-// END PROJECT STAGE
-
-
-// START FETCHING FUNCTIONS
 
 async function fetchUsers() {
     try {
         const response = await fetch('/api/v1/users/list/');
-        if (!response.ok) {
-            throw new Error('Server error: ' + response.status);
-        }
-        const data = await response.json();
-        return data;
+        if (!response.ok) throw new Error('Server error: ' + response.status);
+        return await response.json();
     } catch (e) {
         console.log("Error: " + e);
+        return [];
     }
 }
 
-// END FETCHING FUNCTIONS
-
-// START LOAD PROJECTS
-const projectsLength = JSON.parse(document.getElementById('projects-length').textContent);
+// --- LOAD PROJECTS ---
+const projectsLength = document.getElementById('projects-length') ? JSON.parse(document.getElementById('projects-length').textContent) : 0;
 let projectCount = parseInt(projectsLength);
 
 async function loadProjects() {
+    if(!projectsContainer) return;
     const oldLoad = projectsContainer.innerHTML;
 
-    // Needs work
     const loadingCard = `
         <div class="bg-bg shadow p-4 rounded-sm border border-[#f7f7f7] animate-pulse space-y-4 mb-4">
             <div class="flex justify-between items-center gap-3">
@@ -354,15 +304,13 @@ async function loadProjects() {
             <div class="w-[220px] h-8 rounded-md bg-gray-300 animate-pulse"></div>
         </div>
     `
-
     projectsContainer.innerHTML = '';
-
     const totalLoops = projectCount + 1;
     for (let i = 0; i < totalLoops; i++) {
         projectsContainer.insertAdjacentHTML('beforeend', loadingCard);
     }
 
-    await new Promise(r => setTimeout(r, 1000)); // Test time for animation
+    await new Promise(r => setTimeout(r, 1000));
 
     try {
         const response = await fetch('/api/v1/projects/');
@@ -371,7 +319,6 @@ async function loadProjects() {
             throw new Error('Server error: ' + response.status);
         }
         projectsContainer.innerHTML = '';
-
         const data = await response.json();
 
         const priorityIcons = {
@@ -409,7 +356,6 @@ async function loadProjects() {
                                 </div>
                             </div>
                         `
-
                         contributorsContainer.insertAdjacentHTML('beforeend', div);
                     }
                 })
@@ -437,7 +383,6 @@ async function loadProjects() {
                                 <div>
                                 <p class="text-text text-lg mb-1">Users Contributed:</p>
                                 <div class="flex gap-3 items-center">
-                                <!-- Todo: COMPLETE CONTRIBUTED USERS -->
                                 ${contributorsContainer.outerHTML}
                                 </div>
                                 </div>
@@ -452,12 +397,7 @@ async function loadProjects() {
                             </div>
                             <div>
                                 <p class="text-gray-400">Updated At: 
-                                <!-- Date conversion was AI assisted -->
-                                ${ new Date(project.updated_at).toLocaleDateString('en-US', { 
-                                    month: 'short', 
-                                    day: 'numeric', 
-                                    year: 'numeric' 
-                                }) }
+                                ${ new Date(project.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
                                 </p>
                             </div>
                         </div>
@@ -473,9 +413,8 @@ async function loadProjects() {
         throw e;
     }
 }
-// END LOAD PROJECTS
 
-// START PROJECT SAVE
+// --- SAVE PROJECT ---
 const saveNewProjectValidator = new FormValidator();
 async function saveNewProject(btn, users) {
 
@@ -510,13 +449,12 @@ async function saveNewProject(btn, users) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-CSRFToken": csrftoken,
+                    "X-CSRFToken": csrftoken // Using the global variable
                 },
                 body: JSON.stringify(payload),
             })
 
             if (response.ok) {
-                //On going
                 await loadProjects();
                 projectCount += 1;
                 await updateTotals();
@@ -524,10 +462,10 @@ async function saveNewProject(btn, users) {
             } else {
                 const errorData = await response.json();
                 console.error("Save failed:", errorData);
-
                 btn.disabled = false;
                 btn.innerText = "Save";
                 btn.classList.remove('animate-pulse');
+                alert("Failed to save project. Check console for details.");
             }
         } else {
             btn.disabled = false;
@@ -543,8 +481,6 @@ async function saveNewProject(btn, users) {
         btn.classList.remove('animate-pulse');
     }
 }
-
-// END PROJECT SAVE
 
 const projectBlock = `
     <div id="newPorjectFormCard" class="bg-bg border border-[#f7f7f7] shadow-sm rounded-sm p-4 mb-4">
@@ -567,9 +503,7 @@ const projectBlock = `
                         <button type="button" id="assignProjectUsersBtn" class="bg-brand-400 hover:cursor-pointer rounded-full py-1 px-2 text-sm">+</button>
                     </div>
                 </div>
-                <div id="selectedUsersWrapper" class="flex gap-3 items-center">
-                   <!-- Loaded Selected Users. Function loadSelectedUsers() -->
-                </div>
+                <div id="selectedUsersWrapper" class="flex gap-3 items-center"></div>
             </div>
             <div class="flex flex-col gap-1">
                 <label for="projectPrice">Price:</label>
@@ -596,19 +530,14 @@ let activeNewProjectCard = false
 
 function toggleAddProject() {
     activeNewProjectCard = !activeNewProjectCard;
-
     if (!activeNewProjectCard) {
         addProjectBtn.classList.remove('hidden');
     }
 }
 
-
 function cancelNewProject() {
     const formCard = document.getElementById('newPorjectFormCard');
-
-    if (formCard) {
-        formCard.remove();
-    }
+    if (formCard) formCard.remove();
     toggleAddProject();
 }
 
@@ -617,7 +546,6 @@ function addProject() {
         projectsContainer.insertAdjacentHTML('beforeend', projectBlock)
 
         const saveBtn = document.getElementById('saveNewProject');
-
         const cancelNewProjectBtn = document.getElementById('cancelNewProject');
         cancelNewProjectBtn.addEventListener('click', cancelNewProject);
 
@@ -646,61 +574,68 @@ const assignUser = new UserSelector({
     modalTitle: 'Assign Employees'
 });
 
-// START UPDATE CUSTOMER
-
+// --- CUSTOMER UPDATE ---
 const form = document.getElementById('customerEditForm');
 const validator = new FormValidator();
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    validator.reset();
+if (form) {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        validator.reset();
 
-    const firstNameInput = form.elements['first_name'];
-    const lastNameInput  = form.elements['last_name'];
+        const firstNameInput = form.elements['first_name'];
+        const lastNameInput  = form.elements['last_name'];
+        const emailInput  = form.elements['email'];
+        const phoneInput  = form.elements['phone_number'];
+        const sourceSelect = form.elements['source'];
+        const leadStatusSelect = form.elements['lead_status'];
 
-    const addressInput = form.elements['address'];
-    const cityInput = form.elements['city'];
-    const stateInput  = form.elements['state'];
-    const countryInput = form.elements['country'];
+        // Validation Checks
+        validator.checkText(firstNameInput, 'First Name is required');
+        validator.checkText(lastNameInput, 'Last Name is required');
+        validator.checkEmail(emailInput, 'Invalid Email');
+        validator.checkPhone(phoneInput, 'Invalid Phone Number');
+        validator.checkText(sourceSelect, 'Please select a Source');
+        validator.checkText(leadStatusSelect, 'Please select a Status');
 
-    const companySelect = form.elements['company'];
-    const emailInput  = form.elements['email'];
-    const phoneInput  = form.elements['phone_number'];
+        // Check if Project Card is open
+        if (typeof activeNewProjectCard !== 'undefined' && activeNewProjectCard) {
+            const formCard = document.getElementById('newPorjectFormCard');
+            if(formCard) {
+                formCard.classList.remove('border-[#f7f7f7]');
+                formCard.classList.add('border-red-500', 'border-2');
+                alert("Please save or cancel the new project before updating the customer.");
+            }
+        } else {
+            if (validator.passes()) {
+                console.log("Validation passed. Preparing data...");
 
-    const sourceSelect = form.elements['source'];
-    const leadStatusSelect = form.elements['lead_status'];
+                const formData = new FormData(form);
 
-    validator.checkText(firstNameInput, 'First Name is required');
-    validator.checkText(lastNameInput, 'Last Name is required');
+                // --- DATA CLEANUP TO PREVENT 400 ERRORS ---
+                if (formData.get('company') === "") formData.delete('company');
+                if (formData.get('source') === "") formData.delete('source');
+                if (formData.get('lead_status') === "") formData.delete('lead_status');
 
-    validator.checkEmail(emailInput, 'Invalid Email');
-    validator.checkPhone(phoneInput, 'Invalid Phone Number');
+                const fileInput = document.getElementById('related_files');
+                if (fileInput && fileInput.files.length === 0) {
+                    formData.delete('files');
+                }
 
-    validator.checkText(sourceSelect, 'Please select a Source');
-    validator.checkText(leadStatusSelect, 'Please select a Status');
-
-    if (activeNewProjectCard) {
-        const formCard = document.getElementById('newPorjectFormCard');
-
-        formCard.classList.remove('border-[#f7f7f7]');
-
-        formCard.classList.add('border-red-500', 'border-2');
-    } else {
-        if (validator.passes()) {
-            const formData = new FormData(form);
-
-            await updateCustomer(formData);
+                await updateCustomer(formData);
+            } else {
+                console.log("Validation failed.");
+            }
         }
-    }
-
-})
+    });
+}
 
 async function updateCustomer(formData) {
     try {
         const response = await fetch(`/api/v1/customers/${currentCustomerId}/`, {
             method: "PATCH",
             headers: {
-                "X-CSRFToken": csrftoken,
+                "X-CSRFToken": csrftoken, // Using the global variable
             },
             body: formData,
         });
@@ -710,10 +645,122 @@ async function updateCustomer(formData) {
             console.log("Success:", data);
             window.location.reload();
         } else {
-            console.error("Error:", await response.json());
+            const errorData = await response.json();
+            console.error("Server Validation Error:", errorData);
+            alert("Update Failed:\n" + JSON.stringify(errorData, null, 2));
         }
 
     } catch (e) {
-        console.error(e);
+        console.error("Network or Script Error:", e);
+        alert("Network error.");
+    }
+}
+
+// --- COMPANY CREATION ---
+const addCompanyBtn = document.getElementById('addCompany');
+const createCompanyRelative = document.getElementById('createCompanyRelative');
+
+const addCompanyFormDIV = `
+    <div id="tempFormWrapper" class="absolute top-0 left-0 p-3 bg-bg shadow-sm rounded-md z-20">
+        <div id="addCompanyForm">
+            <div class="flex gap-4">
+                <div class="flex flex-col">
+                    <label class="text-sm text-text">Company Name:</label>
+                    <input type="text" placeholder="Company Name" name="company_name"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-sm text-text">Vat ID:</label>
+                    <input type="text" placeholder="Vat ID" name="vat_id"
+                           class="border border-gray-300 rounded px-2 py-1">
+                </div>
+                <div class="flex justify-center items-center">
+                    <button type="button" id="addCompanySubmit" class="leading-none px-2 py-1 text-sm text-text bg-brand-400 hover:cursor-pointer rounded">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="closeAddCompany" class="fixed top-0 left-0 h-full w-full bg-black opacity-15 z-10"></div>
+`;
+
+if (addCompanyBtn) {
+    addCompanyBtn.addEventListener('click', () => {
+        if (document.getElementById('addCompanyForm')) return;
+        createCompanyRelative.insertAdjacentHTML('beforeend', addCompanyFormDIV);
+
+        const overlay = document.getElementById('closeAddCompany');
+        const formWrapper = document.getElementById('tempFormWrapper');
+        const submitBtn = document.getElementById('addCompanySubmit');
+        const formContainer = document.getElementById('addCompanyForm');
+
+        const nameInput = formContainer.querySelector('input[name="company_name"]');
+        const vatInput = formContainer.querySelector('input[name="vat_id"]');
+
+        const closeForm = () => {
+            overlay.remove();
+            formWrapper.remove();
+        };
+
+        overlay.addEventListener('click', closeForm);
+
+        submitBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            let isValid = true;
+            nameInput.classList.remove('border-red-500');
+            vatInput.classList.remove('border-red-500');
+
+            if (!nameInput.value.trim()) {
+                nameInput.classList.add('border-red-500');
+                isValid = false;
+            }
+            if (!vatInput.value.trim()) {
+                vatInput.classList.add('border-red-500');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            const companyData = {
+                company_name: nameInput.value,
+                vat_id: vatInput.value
+            };
+
+            submitBtn.innerText = "Creating...";
+            submitBtn.disabled = true;
+
+            await createCompany(companyData, closeForm);
+        });
+    });
+}
+
+async function createCompany(data, callback) {
+    try {
+        const response = await fetch('/api/v1/companies/list/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": csrftoken, // Using the global variable
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            if (callback) callback();
+            window.location.reload();
+        } else {
+            console.error("Server Error:", response.status);
+            alert("Failed to create company.");
+        }
+
+    } catch (e) {
+        console.error("Network Error:", e);
+        alert("Network error occurred.");
+    } finally {
+        const submitBtn = document.getElementById('addCompanySubmit');
+        if (submitBtn) {
+            submitBtn.innerText = "Create";
+            submitBtn.disabled = false;
+        }
     }
 }

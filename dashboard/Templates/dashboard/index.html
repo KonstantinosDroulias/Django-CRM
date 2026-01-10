@@ -4,10 +4,38 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block body %}
-    <section class="grid 2xl:grid-cols-6 xl:grid-cols-4 md:grid-cols-2 sm:grid-cols-2 gap-4">
-        {% include 'components/stats-card.html' with img_url="/static/img/NewLead.svg" card_title="New Leads" amount="313" percentage="2.41" caption="caption" %}
-        {% include 'components/stats-card.html' with img_url="/static/img/NewLead.svg" card_title="New Leads" amount="313" percentage="2.41" caption="caption" %}
-        {% include 'components/stats-card.html' with img_url="/static/img/NewLead.svg" card_title="New Leads" amount="313" percentage="2.41" caption="caption" %}
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+        <div class="p-5 rounded-lg bg-bg text-text shadow flex gap-4">
+            <div class="overflow-hidden rounded-full bg-brand-400 p-3 shrink-0 flex items-center justify-center w-[60px] h-[60px]">
+                <img src="{% static 'img/NewLead.svg' %}" width="30px" height="30px" alt="Icon">
+            </div>
+            <div class="flex flex-col gap-1 justify-center">
+                <div class="text-xl">Customers</div>
+                <div class="text-3xl font-bold">{{ stats.customers }}</div>
+            </div>
+        </div>
+
+        <div class="p-5 rounded-lg bg-bg text-text shadow flex gap-4">
+            <div class="overflow-hidden rounded-full bg-brand-400 p-3 shrink-0 flex items-center justify-center w-[60px] h-[60px]">
+                <img src="{% static 'img/NewLead.svg' %}" width="30px" height="30px" alt="Icon">
+            </div>
+            <div class="flex flex-col gap-1 justify-center">
+                <div class="text-xl">Projects</div>
+                <div class="text-3xl font-bold">{{ stats.projects }}</div>
+            </div>
+        </div>
+
+        <div class="p-5 rounded-lg bg-bg text-text shadow flex gap-4">
+            <div class="overflow-hidden rounded-full bg-brand-400 p-3 shrink-0 flex items-center justify-center w-[60px] h-[60px]">
+                <img src="{% static 'img/NewLead.svg' %}" width="30px" height="30px" alt="Icon">
+            </div>
+            <div class="flex flex-col gap-1 justify-center">
+                <div class="text-xl">Total Revenue</div>
+                <div class="text-3xl font-bold">{{ stats.revenue }} €</div>
+            </div>
+        </div>
+
     </section>
 
     <section class="grid lg:grid-cols-2 md:grid-cols-1 gap-4">

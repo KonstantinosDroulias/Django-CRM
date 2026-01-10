@@ -20,6 +20,6 @@ class ProjectsSerializer(serializers.ModelSerializer):
             'stage',
             'contributed',
             'customers',
-            'company',
+            # 'company',  <-- REMOVED THIS LINE
             'updated_at'
         ]

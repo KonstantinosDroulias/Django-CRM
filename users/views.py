@@ -16,45 +16,47 @@ class ClerioLoginView(LoginView):
 
 @login_required
 def update_user(request, pk):
-    # 2. Get the User object
     user_to_edit = get_object_or_404(User, id=pk)
 
-    # 3. HANDLE FORM SUBMISSION (POST)
     if request.method == 'POST':
-        # A. Update Basic User Fields
+        if request.POST.get('action') == 'delete':
+            user_to_edit.delete()
+            return redirect('/')
+
         user_to_edit.username = request.POST.get('username')
         user_to_edit.email = request.POST.get('email')
         user_to_edit.first_name = request.POST.get('first_name')
         user_to_edit.last_name = request.POST.get('last_name')
 
-        # Checkbox logic
-        user_to_edit.is_active = request.POST.get('is_active') == 'on'
+        # --- FIX STARTS HERE ---
+        # Only touch is_active if the current user is an Admin (has permission)
+        # Otherwise, leave it exactly as it is in the database.
+        if request.user.has_perm('auth.add_user'):
+            user_to_edit.is_active = request.POST.get('is_active') == 'on'
+        # --- FIX ENDS HERE ---
+
         user_to_edit.save()
 
-        # B. Update Profile (Phone & Image)
-        # get_or_create ensures we don't crash if profile doesn't exist yet
+        # Update Profile
         profile, created = Profile.objects.get_or_create(user=user_to_edit)
-
         profile.phone_number = request.POST.get('phone')
 
-        # Only update the avatar if a new file was uploaded
         if request.FILES.get('image'):
             profile.avatar = request.FILES.get('image')
 
         profile.save()
 
-        # C. Update Role (Groups)
+        # Update Role (Only Admins should probably do this too, but leaving as is for now)
         group_id = request.POST.get('groups')
         if group_id:
             user_to_edit.groups.clear()
             group = Group.objects.get(id=group_id)
             user_to_edit.groups.add(group)
 
-        # D. Redirect
         messages.success(request, "User updated successfully.")
         return redirect('/')
 
-        # 4. HANDLE PAGE LOAD (GET)
+    # ... GET logic remains the same ...
     all_groups = Group.objects.all()
     user_group_ids = list(user_to_edit.groups.values_list('id', flat=True))
 
@@ -63,7 +65,6 @@ def update_user(request, pk):
         'all_groups': all_groups,
         'user_group_ids': user_group_ids,
     }
-    # Ensure this matches your template filename
     return render(request, 'users/settings.html', context)
 
 

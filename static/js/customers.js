@@ -118,25 +118,13 @@ async function loadTable() {
                 return `<option value="${status.id}" ${isSelected}>${status.name}</option>`;
             }).join('');
 
-            const lastContactHtml = `
-                <input 
-                    type="date" 
-                    value="${customer.last_contact || ''}" 
-                    data-id="${customer.id}" 
-                    data-field="last_contact"
-                    onchange="updateCustomerDate(this)"
-                    class="bg-transparent border-none text-sm text-gray-700 focus:ring-brand-400 rounded-sm p-1 hover:bg-gray-100 cursor-pointer"
-                >`;
+            const lastContactHtml = customer.last_contact
+                ? `<div class="text-center text-sm text-gray-700">${new Date(customer.last_contact).toLocaleDateString()}</div>`
+                : `<div class="text-center">-</div>`;
 
-            const nextContactHtml = `
-                <input 
-                    type="date" 
-                    value="${customer.next_contact || ''}" 
-                    data-id="${customer.id}" 
-                    data-field="next_contact" 
-                    onchange="updateCustomerDate(this)"
-                    class="bg-transparent border-none text-sm text-gray-700 focus:ring-brand-400 rounded-sm p-1 hover:bg-gray-100 cursor-pointer"
-                >`;
+            const nextContactHtml = customer.next_contact
+                ? `<div class="text-center text-sm text-gray-700">${new Date(customer.next_contact).toLocaleDateString()}</div>`
+                : `<div class="text-center">-</div>`;
 
             const row = `
                 <tr class="group border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
