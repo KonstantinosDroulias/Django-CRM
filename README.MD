@@ -11,7 +11,12 @@ For Mac : source .venv/bin/activate
 ```bash
 # Install Requirements
 pip install -r requirements.txt
-# **Note: Might need to run npm install for tailwind not sure. If you need npm run watch:css then you defenatly need it
+# Note: Might need to run npm install for tailwind not sure. If you need npm run watch:css then you defenatly need it
+```
+```bash
+# Might Also need to create a .env file with:
+SECRET_KEY='randomstring'
+DEBUG=True
 ```
 ```bash
 python manage.py makemigrations
